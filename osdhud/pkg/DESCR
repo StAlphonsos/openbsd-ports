@@ -1,0 +1,3 @@
+osdhud is a heads-up display for system status based on the xosd
+library.  Morally the equivalent of ^T for X windows.  Goes well with
+cwm.
