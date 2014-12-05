@@ -11,7 +11,7 @@ GH_TAGNAME =	v${V}
 GH_COMMIT =	375af99adf1e5e2363eed6aef38007fc1ef77683
 
 HOMEPAGE =	http://trac.haqistan.net/wiki/osdhud
-MAINTAINER =	attila <attila@stalphonsos.com>
+MAINTAINER =	Sean Levy <attila@stalphonsos.com>
 
 # ISC
 PERMIT_PACKAGE_CDROM =	Yes
