@@ -26,7 +26,7 @@ CONFIGURE_STYLE =	simple
 NO_TEST =	Yes
 
 do-install:
-	${INSTALL_PROGRAM} ${WRKSRC}/osdhud ${PREFIX}/bin/
-	${INSTALL_MAN} ${WRKSRC}/osdhud.1 ${PREFIX}/man/man1
+	${INSTALL_PROGRAM} ${WRKSRC}/multimarkdown ${PREFIX}/bin/
+#	${INSTALL_MAN} ${WRKSRC}/osdhud.1 ${PREFIX}/man/man1
 
 .include <bsd.port.mk>
