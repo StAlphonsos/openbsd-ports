@@ -1,12 +1,12 @@
 $OpenBSD$
 
 We don't care about rebuilding when source files change since they
-aren't going to change in this case (ports).  The deps as written
-in the Makefile are muddled 
+aren't going to change in this case (ports).  Clean up a bit wrt
+samples/test so at least all of the targets work.
 
 --- Makefile.orig	Tue Oct  8 22:39:24 2013
-+++ Makefile	Fri Dec 19 12:04:22 2014
-@@ -24,22 +24,18 @@
++++ Makefile	Fri Dec 19 13:12:24 2014
+@@ -24,33 +24,25 @@
  	rm -f $(BINDIR)/greg
  
  # bootstrap greg from greg.g
@@ -29,7 +29,20 @@ in the Makefile are muddled
  
  clean : .FORCE
 -	rm -rf *~ *.o *.greg.[cd] greg ${SAMPLES:.leg=.o} ${SAMPLES:.leg=} ${SAMPLES:.leg=.c} samples/*.dSYM testing1.c testing2.c *.dSYM selftest/
-+	rm -rf *~ *.o *.greg.[cd] greg greg-new ${SAMPLES:.leg=.o} ${SAMPLES:.leg=} ${SAMPLES:.leg=.c} samples/*.dSYM testing1.c testing2.c *.dSYM selftest/
++	rm -rf *~ *.o *.greg.[cd] greg greg-new greg-new.c ${SAMPLES:.leg=.o} ${SAMPLES:.leg=} ${SAMPLES:.leg=.c} samples/*.dSYM testing1.c testing2.c *.dSYM selftest/
  
  spotless : clean .FORCE
  	rm -f greg
++	(cd samples; $(MAKE) $(MFLAGS) clean)
+ 
+-samples/calc.c: samples/calc.leg greg
+-	./greg -o $@ $<
+-
+-samples/calc: samples/calc.c
+-	$(CC) $(CFLAGS) -o $@ $<
+-
+ samples: ${SAMPLES:.leg=} greg
++	(cd samples; $(MAKE) $(MFLAGS))
+ 
+ %.c: %.leg
+ 	./greg $< > $@
