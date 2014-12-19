@@ -2,7 +2,7 @@
 
 V =		4.6
 COMMENT =	MultiMarkdown Reimplementation in C
-DISTNAME =	MultiMarkdown-4-${V}
+DISTNAME =	MultiMarkdown4-${V}
 CATEGORIES =	textproc
 
 GH_ACCOUNT =	fletcher
