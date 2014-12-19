@@ -1,0 +1,15 @@
+$OpenBSD$
+
+Use a four-arg YY_INPUT() as per patch-compile_c
+
+--- samples/basic.leg.orig	Tue Oct  8 22:39:24 2013
++++ samples/basic.leg	Fri Dec 19 13:04:56 2014
+@@ -39,7 +39,7 @@
+ 
+ # define min(x, y) ((x) < (y) ? (x) : (y))
+ 
+-# define YY_INPUT(buf, result, max_size)	\
++# define YY_INPUT(buf, result, max_size, D)	\
+   {						\
+     if ((pc >= 0) && (pc < numLines))		\
+       {						\

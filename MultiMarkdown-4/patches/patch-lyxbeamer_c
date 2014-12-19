@@ -1,3 +1,7 @@
+$OpenBSD$
+
+A compiler warning re uninitialized old_type might have merit.
+
 --- lyxbeamer.c.orig	Mon Sep 22 12:57:41 2014
 +++ lyxbeamer.c	Tue Dec 16 19:36:00 2014
 @@ -38,7 +38,7 @@
@@ -9,3 +13,4 @@
  	
  	/* If we are forcing a complete document, and METADATA isn't the first thing,
  		we need to close <head> */
+

@@ -18,7 +18,8 @@ PERMIT_PACKAGE_CDROM =	Yes
 
 WANTLIB += c
 
-NO_TEST =	Yes
+# I think this is okay...
+#NO_TEST =	Yes
 
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/greg ${PREFIX}/bin/

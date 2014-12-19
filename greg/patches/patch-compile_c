@@ -1,0 +1,26 @@
+$OpenBSD$
+
+Widen the YY_INPUT() interface to four args, since that seems to be
+how it is actually used in the only real application that uses greg
+I've tried so far (MMD-4).
+
+--- compile.c.orig	Tue Oct  8 22:39:24 2013
++++ compile.c	Fri Dec 19 13:19:12 2014
+@@ -502,7 +502,7 @@
+ #define YY_NAME(N) yy##N\n\
+ #endif\n\
+ #ifndef YY_INPUT\n\
+-#define YY_INPUT(buf, result, max_size)			\\\n\
++#define YY_INPUT(buf, result, max_size, D)		\\\n\
+   {							\\\n\
+     int yyc= fgetc(G->input);				\\\n\
+     if ('\\n' == yyc) ++G->lineno;      		\\\n\
+@@ -624,7 +624,7 @@
+       G->buflen *= 2;\n\
+       G->buf= (char*)YY_REALLOC(G->buf, G->buflen, G->data);\n\
+     }\n\
+-  YY_INPUT((G->buf + G->pos), yyn, (G->buflen - G->pos));\n\
++  YY_INPUT((G->buf + G->pos), yyn, (G->buflen - G->pos), G->data);\n\
+   if (!yyn) return 0;\n\
+   G->limit += yyn;\n\
+   return 1;\n\

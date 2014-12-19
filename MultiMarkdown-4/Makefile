@@ -7,26 +7,24 @@ CATEGORIES =	textproc
 
 GH_ACCOUNT =	fletcher
 GH_PROJECT =	MultiMarkdown-4
-GH_TAGNAME =	v${V}
+GH_TAGNAME =	${V}
 GH_COMMIT =	ad9595beb6f9380ad18f1fd07919a16a6d14fc46
 
 HOMEPAGE =	http://fletcherpenney.net/mmd
 MAINTAINER =	Sean Levy <attila@stalphonsos.com>
 
-# ISC
+# MIT
 PERMIT_PACKAGE_CDROM =	Yes
 
-WANTLIB += Judy X11 Xext Xinerama c pthread xosd
+USE_GMAKE =	Yes
 
-LIB_DEPENDS =	devel/libJudy \
-		x11/xosd
+WANTLIB += c
 
-CONFIGURE_STYLE =	simple
+BUILD_DEPENDS =	devel/greg
 
 NO_TEST =	Yes
 
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/multimarkdown ${PREFIX}/bin/
-#	${INSTALL_MAN} ${WRKSRC}/osdhud.1 ${PREFIX}/man/man1
 
 .include <bsd.port.mk>

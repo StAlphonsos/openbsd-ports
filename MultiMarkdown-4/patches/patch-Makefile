@@ -1,19 +1,31 @@
 $OpenBSD$
 
-Under OpenBSD switch to using arc4random(3) wherever
-possible.  In the case of MMD-4 this means everywhere.
-There is no autoconf so just tweak the Makefile
+Under OpenBSD switch to using the greg parser generator
+from ports.
 
 --- Makefile.orig	Mon Sep 22 12:57:41 2014
-+++ Makefile	Tue Dec 16 19:36:00 2014
-@@ -5,6 +5,10 @@
- # - Fletcher T. Penney
++++ Makefile	Fri Dec 19 14:50:12 2014
+@@ -25,19 +25,16 @@
+ LDFLAGS += -static -static-libgcc
+ endif
  
- CFLAGS ?= -Wall -g -O3 -include GLibFacade.h
-+UNAME = $(shell uname)
-+ifeq ($(UNAME),OpenBSD)
-+  CFLAGS += -DHAVE_ARC4RANDOM
-+endif
- PROGRAM = multimarkdown
- VERSION = 4.6
+-GREG= greg/greg
++GREG= greg
  
+-ALL : $(PROGRAM) enumMap.txt
++all ALL : $(PROGRAM) enumMap.txt
+ static : $(PROGRAM) enumMap.txt
+ 
+ %.o : %.c parser.h
+ 	$(CC) -c $(CFLAGS) -o $@ $<
+ 
+-parser.c : parser.leg greg/greg parser.h
+-	greg/greg -o parser.c parser.leg
+-
+-$(GREG): greg
+-	$(MAKE) -C greg
++parser.c : parser.leg parser.h
++	$(GREG) -o parser.c parser.leg
+ 
+ $(PROGRAM) : $(OBJS)
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
