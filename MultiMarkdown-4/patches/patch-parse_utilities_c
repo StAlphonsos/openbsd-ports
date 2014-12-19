@@ -1,0 +1,40 @@
+--- parse_utilities.c.orig	Mon Sep 22 12:57:41 2014
++++ parse_utilities.c	Tue Dec 16 19:36:00 2014
+@@ -22,7 +22,9 @@
+ #include "parser.h"
+ #include <libgen.h>
+ 
++#ifndef __OpenBSD__
+ #pragma mark - Parse Tree
++#endif /* __OpenBSD__ */
+ 
+ /* Create a new node in the parse tree */
+ node * mk_node(int key) {
+@@ -219,7 +221,9 @@
+ 	}
+ }
+ 
++#ifndef __OpenBSD__
+ #pragma mark - Parser Data
++#endif /* __OpenBSD__ */
+ 
+ /* Create parser data - this is where you stash stuff to communicate 
+ 	into and out of the parser */
+@@ -278,10 +282,16 @@
+ 	result->table_column = 0;
+ 
+ 	if (extensions & EXT_RANDOM_FOOT) {
+-	    srand((int)time(NULL));
++#ifdef HAVE_ARC4RANDOM
++		result->random_seed_base = arc4random() % 32000;
++#else
++	        srand((int)time(NULL));
+ 		result->random_seed_base = rand() % 32000;
++#endif
+ 	} else {
++#ifndef HAVE_ARC4RANDOM
+ 		srand(1);
++#endif
+ 		result->random_seed_base = 0;
+ 	}
+ 	ran_start(310952L);

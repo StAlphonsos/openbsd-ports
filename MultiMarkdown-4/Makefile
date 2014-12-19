@@ -2,9 +2,9 @@
 
 V =		4.6
 COMMENT =	MultiMarkdown Reimplementation in C
-DISTNAME =	MultiMarkdown4-${V}
+DISTNAME =	MultiMarkdown-4-${V}
 CATEGORIES =	textproc
-# https://github.com/fletcher/MultiMarkdown-4/commit/ad9595beb6f9380ad18f1fd07919a16a6d14fc46
+
 GH_ACCOUNT =	fletcher
 GH_PROJECT =	MultiMarkdown-4
 GH_TAGNAME =	v${V}

@@ -1,0 +1,18 @@
+$OpenBSD$
+
+Fix sprintf(3) warning by switching to snprintf(3)
+
+--- tree.c.orig	Tue Oct  8 22:39:24 2013
++++ tree.c	Thu Dec 18 17:13:42 2014
+@@ -140,8 +140,10 @@
+ {
+   Node *node= newNode(Action);
+   char name[1024];
++  size_t n;
+   assert(thisRule);
+-  sprintf(name, "_%d_%s", ++actionCount, thisRule->rule.name);
++  n = snprintf(name,sizeof(name),"_%d_%s",++actionCount,thisRule->rule.name);
++  assert(n < sizeof(name));
+   node->action.name= strdup(name);
+   node->action.text= strdup(text);
+   node->action.list= actions;

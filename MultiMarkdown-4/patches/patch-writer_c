@@ -1,0 +1,45 @@
+--- writer.c.orig	Mon Sep 22 12:57:41 2014
++++ writer.c	Tue Dec 16 19:36:01 2014
+@@ -634,6 +634,7 @@
+     int i;
+     char *upper;
+     GString *result;
++    size_t dimension_len;
+ 
+     attribute = node_for_attribute(querystring, list);
+     if (attribute == NULL) return NULL;
+@@ -641,6 +642,7 @@
+ 	fprintf(stderr, "a\n");
+ #endif
+ 
++    dimension_len = strlen(attribute->children->str);
+     dimension = strdup(attribute->children->str);
+     upper = strdup(attribute->children->str);
+ 
+@@ -653,15 +655,13 @@
+ 	fprintf(stderr, "b\n");
+ #endif
+ 
+-    if (strstr(dimension, "px")) {
+-        ptr = strstr(dimension,"px");
+-        ptr[0] = '\0';
+-        strcat(ptr,"pt");
+-    }
++    ptr = strstr(dimension, "px");
++    if (ptr)
++        ptr[1] = 't';
+ 
+     result = g_string_new(dimension);
+     
+-    if ((strcmp(dimension,upper) == 0) && (dimension[strlen(dimension) -1] != '%')) {
++    if ((strcmp(dimension,upper) == 0) && (dimension[dimension_len-1] != '%')) {
+         /* no units */
+         g_string_append_printf(result, "pt");
+     }
+@@ -714,4 +714,4 @@
+ 	}
+ 
+ 	return r;
+-}
+\ No newline at end of file
++}

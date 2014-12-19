@@ -1,0 +1,19 @@
+$OpenBSD$
+
+Under OpenBSD switch to using arc4random(3) wherever
+possible.  In the case of MMD-4 this means everywhere.
+There is no autoconf so just tweak the Makefile
+
+--- Makefile.orig	Mon Sep 22 12:57:41 2014
++++ Makefile	Tue Dec 16 19:36:00 2014
+@@ -5,6 +5,10 @@
+ # - Fletcher T. Penney
+ 
+ CFLAGS ?= -Wall -g -O3 -include GLibFacade.h
++UNAME = $(shell uname)
++ifeq ($(UNAME),OpenBSD)
++  CFLAGS += -DHAVE_ARC4RANDOM
++endif
+ PROGRAM = multimarkdown
+ VERSION = 4.6
+ 

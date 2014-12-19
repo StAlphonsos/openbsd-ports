@@ -1,0 +1,11 @@
+--- lyxbeamer.c.orig	Mon Sep 22 12:57:41 2014
++++ lyxbeamer.c	Tue Dec 16 19:36:00 2014
+@@ -38,7 +38,7 @@
+ 	char *temp;
+ 	char *prefixed_label;
+ 	node *temp_node;
+-	int old_type;
++	int old_type = -1;
+ 	
+ 	/* If we are forcing a complete document, and METADATA isn't the first thing,
+ 		we need to close <head> */
