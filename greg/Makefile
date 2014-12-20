@@ -2,7 +2,7 @@
 
 V =		0.4.5
 COMMENT =	PEG-based parser generator
-DISTNAME =	greg-${V}
+DISTNAME =	${GH_PROJECT}-${V}
 CATEGORIES =	devel
 
 GH_ACCOUNT =	fasterthanlime
@@ -18,8 +18,7 @@ PERMIT_PACKAGE_CDROM =	Yes
 
 WANTLIB += c
 
-# I think this is okay...
-#NO_TEST =	Yes
+MAKE_FLAGS =	OFLAGS="${CFLAGS} -DNDEBUG -DYY_MAIN"
 
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/greg ${PREFIX}/bin/

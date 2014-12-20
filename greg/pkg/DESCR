@@ -1,8 +1,2 @@
-greg is a recursive-descent parser generator based on Ian Piumarta's peg/leg
-<http://piumarta.com/software/peg/>.  It implements a formalism called
-Parsing Expression Grammars, described in the paper
-
-  "Parsing Expression Grammars: A Recognition-Based Syntactic Foundation"
-
-by Bryan Ford <baford@mit.edu> available here:
-<http://pdos.csail.mit.edu/papers/parsing%3Apopl04.pdf>.
+greg is a recursive-descent parser generator based on Ian Piumarta's
+peg/leg.  It implements a formalism called Parsing Expression Grammars.
