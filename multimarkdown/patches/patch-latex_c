@@ -1,0 +1,29 @@
+$OpenBSD$
+
+Switch from strcat(3) to a safer idiom.
+
+--- latex.c.orig	Mon Sep 22 12:57:41 2014
++++ latex.c	Tue Dec 16 19:36:00 2014
+@@ -1199,16 +1199,16 @@
+ char * correct_dimension_units(char *original) {
+ 	char *result;
+ 	int i;
+-	
++	size_t result_len;
++
+ 	result = strdup(original);
+-	
++	result_len = strlen(result);
++
+ 	for (i = 0; result[i]; i++)
+ 		result[i] = tolower(result[i]);
+ 	
+-	if (strstr(&result[strlen(result)-2],"px")) {
+-		result[strlen(result)-2] = '\0';
+-		strcat(result, "pt");
+-	}
++	if (strstr(&result[result_len-2],"px"))
++		result[result_len-1] = 't';
+ 	
+ 	return result;
+ }

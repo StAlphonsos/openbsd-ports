@@ -1,24 +1,4 @@
-From the README:
-
 MultiMarkdown is a derivative of Markdown that adds new syntax
 features, such as footnotes, tables, and metadata. Additionally, it
 offers mechanisms to convert plain text into LaTeX in addition to
 HTML.
-
-MultiMarkdown started as a Perl script, which was modified from the
-original Markdown.pl.
-
-MultiMarkdown v3 (aka 'peg-multimarkdown') was based on John
-MacFarlane's peg-markdown.  It used a parsing expression grammar
-(PEG), and was written in C in order to compile on almost any
-operating system.  Thanks to work by Daniel Jalkut, MMD v3 was built
-so that it didn't have any external library requirements.
-
-MultiMarkdown v4 is basically a complete rewrite of v3.  It uses the
-same basic PEG for parsing (Multi)Markdown text, but otherwise is
-almost completely rebuilt.
-
-See Also:
-
-Original Parsing Expression Grammar (PEG) paper by Brian Ford <baford@mit.edu>
-published in POPL 2004: http://pdos.csail.mit.edu/papers/parsing%3Apopl04.pdf
