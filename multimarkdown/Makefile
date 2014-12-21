@@ -14,8 +14,6 @@ GH_COMMIT =	ad9595beb6f9380ad18f1fd07919a16a6d14fc46
 HOMEPAGE =	http://fletcherpenney.net/multimarkdown/
 MAINTAINER =	Sean Levy <attila@stalphonsos.com>
 
-CFLAGS =	-Wall -g -O3 -include GLibFacade.h -DHAVE_ARC4RANDOM
-
 # Dual licensed: MIT and GPLv2+
 PERMIT_PACKAGE_CDROM =	Yes
 
@@ -25,6 +23,7 @@ BUILD_DEPENDS =	devel/greg
 
 USE_GMAKE =	Yes
 ALL_TARGET =	ALL
+MAKE_FLAGS =	CFLAGS="${CFLAGS} -include GLibFacade.h -DHAVE_ARC4RANDOM"
 
 # Test files aren't included in distfile.
 NO_TEST =	Yes
