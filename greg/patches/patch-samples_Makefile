@@ -4,7 +4,7 @@ Clean up so "make test" works at top level, all expected binaries
 are built with -DYY_MAIN.  Fix the clean target.
 
 --- samples/Makefile.orig	Tue Oct  8 22:39:24 2013
-+++ samples/Makefile	Fri Dec 19 13:15:57 2014
++++ samples/Makefile	Fri Jan  2 14:31:43 2015
 @@ -1,6 +1,6 @@
 -EXAMPLES = test rule accept wc dc dcv calc basic
 +EXAMPLES = test rule accept wc dc dcv calc basic erract
@@ -14,7 +14,7 @@ are built with -DYY_MAIN.  Fix the clean target.
  
  DIFF = diff
  TEE = cat >
-@@ -9,7 +9,7 @@
+@@ -9,7 +9,7 @@ all : $(EXAMPLES)
  
  test : .FORCE
  	../greg -o test.leg.c test.leg
@@ -23,7 +23,7 @@ are built with -DYY_MAIN.  Fix the clean target.
  	echo 'ab.ac.ad.ae.afg.afh.afg.afh.afi.afj.' | ./$@ | $(TEE) $@.out
  	$(DIFF) $@.ref $@.out
  	rm -f $@.out
-@@ -17,7 +17,7 @@
+@@ -17,7 +17,7 @@ test : .FORCE
  
  rule : .FORCE
  	../greg -o rule.leg.c rule.leg
@@ -32,7 +32,7 @@ are built with -DYY_MAIN.  Fix the clean target.
  	echo 'abcbcdabcbcdabcbcdabcbcd' | ./$@ | $(TEE) $@.out
  	$(DIFF) $@.ref $@.out
  	rm -f $@.out
-@@ -25,7 +25,7 @@
+@@ -25,7 +25,7 @@ rule : .FORCE
  
  accept : .FORCE
  	../greg -o accept.leg.c accept.leg
@@ -41,7 +41,7 @@ are built with -DYY_MAIN.  Fix the clean target.
  	echo 'abcbcdabcbcdabcbcdabcbcd' | ./$@ | $(TEE) $@.out
  	$(DIFF) $@.ref $@.out
  	rm -f $@.out
-@@ -41,7 +41,7 @@
+@@ -41,7 +41,7 @@ wc : .FORCE
  
  dc : .FORCE
  	../greg -o dc.leg.c dc.leg
@@ -50,7 +50,7 @@ are built with -DYY_MAIN.  Fix the clean target.
  	echo '  2  *3 *(3+ 4) ' | ./dc | $(TEE) $@.out
  	$(DIFF) $@.ref $@.out
  	rm -f $@.out
-@@ -49,7 +49,7 @@
+@@ -49,7 +49,7 @@ dc : .FORCE
  
  dcv : .FORCE
  	../greg -o dcv.leg.c dcv.leg
@@ -59,7 +59,7 @@ are built with -DYY_MAIN.  Fix the clean target.
  	echo 'a = 6;  b = 7;  a * b' | ./dcv | $(TEE) $@.out
  	$(DIFF) $@.ref $@.out
  	rm -f $@.out
-@@ -71,8 +71,12 @@
+@@ -71,8 +71,12 @@ basic : .FORCE
  	rm -f $@.out
  	@echo
  

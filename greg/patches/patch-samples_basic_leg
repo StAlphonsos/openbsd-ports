@@ -4,7 +4,7 @@ Use a four-arg YY_INPUT() as per patch-compile_c.  Turn sprintf(3) into
 snprintf(3).
 
 --- samples/basic.leg.orig	Tue Oct  8 22:39:24 2013
-+++ samples/basic.leg	Sat Dec 20 12:29:41 2014
++++ samples/basic.leg	Fri Jan  2 14:31:43 2015
 @@ -20,6 +20,7 @@
  
  %{
@@ -22,7 +22,7 @@ snprintf(3).
    {						\
      if ((pc >= 0) && (pc < numLines))		\
        {						\
-@@ -286,7 +287,8 @@
+@@ -286,7 +287,8 @@ char *extend(char *name)
  {
    static char path[1024];
    int len= strlen(name);

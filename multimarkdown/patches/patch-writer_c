@@ -3,8 +3,8 @@ $OpenBSD$
 Switch from strcat to a safer idiom.
 
 --- writer.c.orig	Mon Sep 22 12:57:41 2014
-+++ writer.c	Tue Dec 16 19:36:01 2014
-@@ -634,6 +634,7 @@
++++ writer.c	Wed Jan  7 15:51:56 2015
+@@ -634,6 +634,7 @@ char * dimension_for_attribute(char *querystring, node
      int i;
      char *upper;
      GString *result;
@@ -12,7 +12,7 @@ Switch from strcat to a safer idiom.
  
      attribute = node_for_attribute(querystring, list);
      if (attribute == NULL) return NULL;
-@@ -641,6 +642,7 @@
+@@ -641,6 +642,7 @@ char * dimension_for_attribute(char *querystring, node
  	fprintf(stderr, "a\n");
  #endif
  
@@ -20,7 +20,7 @@ Switch from strcat to a safer idiom.
      dimension = strdup(attribute->children->str);
      upper = strdup(attribute->children->str);
  
-@@ -653,15 +655,13 @@
+@@ -653,15 +655,13 @@ char * dimension_for_attribute(char *querystring, node
  	fprintf(stderr, "b\n");
  #endif
  
@@ -40,10 +40,3 @@ Switch from strcat to a safer idiom.
          /* no units */
          g_string_append_printf(result, "pt");
      }
-@@ -714,4 +714,4 @@
- 	}
- 
- 	return r;
--}
-\ No newline at end of file
-+}

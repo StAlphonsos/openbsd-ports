@@ -5,8 +5,8 @@ come from the user, at least.  They already use assert(3) in the code
 so I just followed along.
 
 --- tree.c.orig	Tue Oct  8 22:39:24 2013
-+++ tree.c	Thu Dec 18 17:13:42 2014
-@@ -140,8 +140,10 @@
++++ tree.c	Fri Jan  2 14:31:43 2015
+@@ -140,8 +140,10 @@ Node *makeAction(char *text)
  {
    Node *node= newNode(Action);
    char name[1024];

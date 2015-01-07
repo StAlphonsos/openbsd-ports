@@ -6,8 +6,8 @@ I've tried so far (MMD-4).  Also convert two instances of sprintf(3)
 to snprintf(3).
 
 --- compile.c.orig	Tue Oct  8 22:39:24 2013
-+++ compile.c	Sat Dec 20 12:19:46 2014
-@@ -136,8 +136,12 @@
++++ compile.c	Fri Jan  2 14:31:43 2015
+@@ -136,8 +136,12 @@ static char *yyqq(char* s) {
      } else if (*s == 92) { // '\'
        *d++ = '\\'; *d++ = *s++;
      } else if (*(signed char *)s<32) {
@@ -22,7 +22,7 @@ to snprintf(3).
      } else {
        *d++ = *s++;
      }
-@@ -152,7 +156,7 @@
+@@ -152,7 +156,7 @@ static char *makeCharClass(unsigned char *cclass)
    setter	 set;
    int		 c, prev= -1;
    static char	 string[256];
@@ -31,7 +31,7 @@ to snprintf(3).
  
    if ('^' == *cclass)
      {
-@@ -179,9 +183,14 @@
+@@ -179,9 +183,14 @@ static char *makeCharClass(unsigned char *cclass)
    }
      }
  
@@ -49,7 +49,7 @@ to snprintf(3).
  
    return string;
  }
-@@ -502,7 +511,7 @@
+@@ -502,7 +511,7 @@ static char *preamble= "\
  #define YY_NAME(N) yy##N\n\
  #endif\n\
  #ifndef YY_INPUT\n\
@@ -58,7 +58,7 @@ to snprintf(3).
    {							\\\n\
      int yyc= fgetc(G->input);				\\\n\
      if ('\\n' == yyc) ++G->lineno;      		\\\n\
-@@ -624,7 +633,7 @@
+@@ -624,7 +633,7 @@ YY_LOCAL(int) yyrefill(GREG *G)\n\
        G->buflen *= 2;\n\
        G->buf= (char*)YY_REALLOC(G->buf, G->buflen, G->data);\n\
      }\n\
