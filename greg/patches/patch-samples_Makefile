@@ -10,7 +10,7 @@ are built with -DYY_MAIN.  Fix the clean target.
 +EXAMPLES = test rule accept wc dc dcv calc basic erract
  
 -CFLAGS = -g -O3
-+CFLAGS += -g -O3 -DYY_MAIN
++CFLAGS += -g -DYY_MAIN
  
  DIFF = diff
  TEE = cat >
