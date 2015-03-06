@@ -1,0 +1,33 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/security/manager/ssl/src/nsNSSIOLayer.h tor-browser/security/manager/ssl/src/nsNSSIOLayer.h
+--- security/manager/ssl/src/nsNSSIOLayer.h.orig	Mon Jan  5 23:07:59 2015
++++ security/manager/ssl/src/nsNSSIOLayer.h	Tue Feb 17 14:37:56 2015
+@@ -10,6 +10,7 @@
+ #include "TransportSecurityInfo.h"
+ #include "nsISSLSocketControl.h"
+ #include "nsIClientAuthDialogs.h"
++#include "nsIProxyInfo.h"
+ #include "nsNSSCertificate.h"
+ #include "nsDataHashtable.h"
+ #include "nsTHashtable.h"
+@@ -202,8 +203,7 @@ class nsSSLIOLayerHelpers (private)
+ nsresult nsSSLIOLayerNewSocket(int32_t family,
+                                const char* host,
+                                int32_t port,
+-                               const char* proxyHost,
+-                               int32_t proxyPort,
++                               nsIProxyInfo *proxy,
+                                PRFileDesc** fd,
+                                nsISupports** securityInfo,
+                                bool forSTARTTLS,
+@@ -212,8 +212,7 @@ nsresult nsSSLIOLayerNewSocket(int32_t family,
+ nsresult nsSSLIOLayerAddToSocket(int32_t family,
+                                  const char* host,
+                                  int32_t port,
+-                                 const char* proxyHost,
+-                                 int32_t proxyPort,
++                                 nsIProxyInfo *proxy,
+                                  PRFileDesc* fd,
+                                  nsISupports** securityInfo,
+                                  bool forSTARTTLS,

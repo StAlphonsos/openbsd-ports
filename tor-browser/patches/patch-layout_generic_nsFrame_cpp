@@ -1,0 +1,18 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/layout/generic/nsFrame.cpp tor-browser/layout/generic/nsFrame.cpp
+--- layout/generic/nsFrame.cpp.orig	Mon Jan  5 23:07:54 2015
++++ layout/generic/nsFrame.cpp	Tue Feb 17 14:37:56 2015
+@@ -1563,7 +1563,11 @@ nsIFrame::DisplayCaret(nsDisplayListBuilder* aBuilder,
+ nscolor
+ nsIFrame::GetCaretColorAt(int32_t aOffset)
+ {
+-  // Use text color.
++  nscolor color = NS_RGB(0, 0, 0);
++  if (nsLayoutUtils::GetNativeTextColor(this, color))
++    return color;
++
++  // Use CSS text color.
+   return StyleColor()->mColor;
+ }
+ 

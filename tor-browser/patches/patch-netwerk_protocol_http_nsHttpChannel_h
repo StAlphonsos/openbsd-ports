@@ -1,0 +1,21 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/protocol/http/nsHttpChannel.h tor-browser/netwerk/protocol/http/nsHttpChannel.h
+--- netwerk/protocol/http/nsHttpChannel.h.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/protocol/http/nsHttpChannel.h	Tue Feb 17 14:37:56 2015
+@@ -282,6 +282,7 @@ class nsHttpChannel : public HttpBaseChannel (private)
+     nsresult ProcessPartialContent();
+     nsresult OnDoneReadingPartialCacheEntry(bool *streamDone);
+ 
++    void     RemoveAuthorizationHeaderIfAppropriate();
+     nsresult DoAuthRetry(nsAHttpConnection *);
+ 
+     void     HandleAsyncRedirectChannelToHttps();
+@@ -353,6 +354,7 @@ class nsHttpChannel : public HttpBaseChannel (private)
+     nsCOMPtr<nsICacheEntry> mOfflineCacheEntry;
+     uint32_t                          mOfflineCacheLastModifiedTime;
+     nsCOMPtr<nsIApplicationCache>     mApplicationCacheForWrite;
++    nsCString                         mCacheDomain;
+ 
+     // auth specific data
+     nsCOMPtr<nsIHttpChannelAuthProvider> mAuthProvider;

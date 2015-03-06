@@ -1,0 +1,13 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/dns/nsDNSService2.h tor-browser/netwerk/dns/nsDNSService2.h
+--- netwerk/dns/nsDNSService2.h.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/dns/nsDNSService2.h	Tue Feb 17 14:37:56 2015
+@@ -57,6 +57,7 @@ class nsDNSService MOZ_FINAL : public nsPIDNSService (
+     bool                                      mDisableIPv6;
+     bool                                      mDisablePrefetch;
+     bool                                      mFirstTime;
++    bool                                      mDisableDNS;
+     bool                                      mOffline;
+     bool                                      mNotifyResolution;
+     nsMainThreadPtrHandle<nsIObserverService> mObserverService;

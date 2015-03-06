@@ -1,0 +1,14 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/toolkit/mozapps/plugins/content/pluginProblem.xml tor-browser/toolkit/mozapps/plugins/content/pluginProblem.xml
+--- toolkit/mozapps/plugins/content/pluginProblem.xml.orig	Mon Jan  5 23:08:06 2015
++++ toolkit/mozapps/plugins/content/pluginProblem.xml	Tue Feb 17 14:37:56 2015
+@@ -46,7 +46,7 @@
+ 		        <html:a class="action-link" anonid="installPluginLink" href="">&installPlugin;</html:a>
+ 		    </html:div>
+                 </html:div>
+-                <html:div class="msg msgManagePlugins"><html:a class="action-link" anonid="managePluginsLink" href="">&managePlugins;</html:a></html:div>
++                <html:div class="msg msgManagePlugins"><html:a class="action-link" anonid="managePluginsLink" href=""></html:a></html:div>
+                 <html:div class="submitStatus" anonid="submitStatus">
+                     <html:div class="msg msgPleaseSubmit" anonid="pleaseSubmit">
+                         <html:textarea class="submitComment"

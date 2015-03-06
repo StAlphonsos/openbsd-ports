@@ -1,0 +1,29 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/content/base/src/ThirdPartyUtil.h tor-browser/content/base/src/ThirdPartyUtil.h
+--- content/base/src/ThirdPartyUtil.h.orig	Mon Jan  5 23:07:58 2015
++++ content/base/src/ThirdPartyUtil.h	Tue Feb 17 14:37:55 2015
+@@ -9,6 +9,7 @@
+ #include "nsString.h"
+ #include "mozIThirdPartyUtil.h"
+ #include "nsIEffectiveTLDService.h"
++#include "nsICookiePermission.h"
+ #include "mozilla/Attributes.h"
+ 
+ class nsIURI;
+@@ -26,9 +27,15 @@ class ThirdPartyUtil MOZ_FINAL : public mozIThirdParty
+ private:
+   nsresult IsThirdPartyInternal(const nsCString& aFirstDomain,
+     nsIURI* aSecondURI, bool* aResult);
++  bool IsFirstPartyIsolationActive(nsIChannel* aChannel, nsIDocument* aDoc);
++  bool SchemeIsWhiteListed(nsIURI *aURI);
+   static already_AddRefed<nsIURI> GetURIFromWindow(nsIDOMWindow* aWin);
++  static nsresult GetOriginatingURI(nsIChannel  *aChannel, nsIURI **aURI);
++  nsresult GetFirstPartyURIInternal(nsIChannel *aChannel, nsIDocument *aDoc,
++                                    bool aLogErrors, nsIURI **aOutput);
+ 
+   nsCOMPtr<nsIEffectiveTLDService> mTLDService;
++  nsCOMPtr<nsICookiePermission> mCookiePermissions;
+ };
+ 
+ #endif

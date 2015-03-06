@@ -1,0 +1,26 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/modules/libmar/verify/moz.build tor-browser/modules/libmar/verify/moz.build
+--- modules/libmar/verify/moz.build.orig	Mon Jan  5 23:07:56 2015
++++ modules/libmar/verify/moz.build	Tue Feb 17 14:37:56 2015
+@@ -15,16 +15,10 @@ FORCE_STATIC_LIB = True
+ 
+ if CONFIG['OS_ARCH'] == 'WINNT':
+     USE_STATIC_LIBS = True
+-elif CONFIG['OS_ARCH'] == 'Darwin':
+-    UNIFIED_SOURCES += [
+-      'MacVerifyCrypto.cpp',
+-    ]
+-    LDFLAGS += [
+-      '-framework Security',
+-    ]
+-else:
+-    DEFINES['MAR_NSS'] = True
+-    LOCAL_INCLUDES += ['../sign']
++
++DEFINES['MAR_NSS'] = True
++DEFINES['MAR_USE_SHA512_RSA_SIG'] = True
++LOCAL_INCLUDES += ['../sign']
+ 
+ LOCAL_INCLUDES += [
+     '../src',

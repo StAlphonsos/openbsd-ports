@@ -1,0 +1,13 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/dom/plugins/base/moz.build tor-browser/dom/plugins/base/moz.build
+--- dom/plugins/base/moz.build.orig	Mon Jan  5 23:08:04 2015
++++ dom/plugins/base/moz.build	Tue Feb 17 14:37:55 2015
+@@ -103,6 +103,7 @@ LOCAL_INCLUDES += [
+     '/gfx/skia/include/core',
+     '/layout/generic',
+     '/layout/xul',
++    '/netwerk/base/src',
+     '/widget/android',
+     '/widget/xpwidgets',
+     '/xpcom/base',

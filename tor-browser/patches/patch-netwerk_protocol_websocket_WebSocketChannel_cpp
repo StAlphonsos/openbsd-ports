@@ -1,0 +1,23 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/protocol/websocket/WebSocketChannel.cpp tor-browser/netwerk/protocol/websocket/WebSocketChannel.cpp
+--- netwerk/protocol/websocket/WebSocketChannel.cpp.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/protocol/websocket/WebSocketChannel.cpp	Tue Feb 17 14:37:56 2015
+@@ -2292,7 +2292,7 @@ WebSocketChannel::ApplyForAdmission()
+ 
+   MOZ_ASSERT(!mCancelable);
+ 
+-  return pps->AsyncResolve(mURI,
++  return pps->AsyncResolve(mHttpChannel,
+                            nsIProtocolProxyService::RESOLVE_PREFER_HTTPS_PROXY |
+                            nsIProtocolProxyService::RESOLVE_ALWAYS_TUNNEL,
+                            this, getter_AddRefs(mCancelable));
+@@ -2406,7 +2406,7 @@ WebSocketChannel::OnLookupComplete(nsICancelable *aReq
+ 
+ // nsIProtocolProxyCallback
+ NS_IMETHODIMP
+-WebSocketChannel::OnProxyAvailable(nsICancelable *aRequest, nsIURI *aURI,
++WebSocketChannel::OnProxyAvailable(nsICancelable *aRequest, nsIChannel *aChannel,
+                                    nsIProxyInfo *pi, nsresult status)
+ {
+   if (mStopped) {

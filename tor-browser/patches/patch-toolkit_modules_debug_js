@@ -1,0 +1,13 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/toolkit/modules/debug.js tor-browser/toolkit/modules/debug.js
+--- toolkit/modules/debug.js.orig	Mon Jan  5 23:08:05 2015
++++ toolkit/modules/debug.js	Tue Feb 17 14:37:56 2015
+@@ -41,6 +41,7 @@ this.NS_ASSERT = function NS_ASSERT(condition, message
+     switch (defB.getCharPref("app.update.channel")) {
+       case "nightly":
+       case "aurora":
++      case "alpha":
+       case "beta":
+       case "default":
+         releaseBuild = false;

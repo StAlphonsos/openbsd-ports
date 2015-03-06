@@ -1,0 +1,21 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/gfx/thebes/gfxFont.cpp tor-browser/gfx/thebes/gfxFont.cpp
+--- gfx/thebes/gfxFont.cpp.orig	Mon Jan  5 23:07:55 2015
++++ gfx/thebes/gfxFont.cpp	Tue Feb 17 14:37:55 2015
+@@ -4681,6 +4681,7 @@ gfxFontGroup::FindPlatformFont(const nsAString& aName,
+     }
+ 
+     // Not known in the user font set ==> check system fonts
++    // XXX: Fallback is bad..
+     if (!family) {
+         gfxPlatformFontList *fontList = gfxPlatformFontList::PlatformFontList();
+         family = fontList->FindFamily(aName);
+@@ -4907,6 +4908,7 @@ gfxFontGroup::ForEachFontInternal(const nsAString& aFa
+                     }
+                     if (!foundFamily) {
+                         gfxPlatform *pf = gfxPlatform::GetPlatform();
++                        // XXX: Fallback is bad
+                         rv = pf->ResolveFontName(family,
+                                                  gfxFontGroup::FontResolverProc,
+                                                  &data, aborted);

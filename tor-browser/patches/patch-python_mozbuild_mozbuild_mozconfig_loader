@@ -1,0 +1,25 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/python/mozbuild/mozbuild/mozconfig_loader tor-browser/python/mozbuild/mozbuild/mozconfig_loader
+--- python/mozbuild/mozbuild/mozconfig_loader.orig	Mon Jan  5 23:07:59 2015
++++ python/mozbuild/mozbuild/mozconfig_loader	Tue Dec 16 13:57:04 2014
+@@ -44,10 +44,6 @@ mk_add_options() {
+   done
+ }
+ 
+-echo "------BEGIN_ENV_BEFORE_SOURCE"
+-env
+-echo "------END_ENV_BEFORE_SOURCE"
+-
+ echo "------BEGIN_BEFORE_SOURCE"
+ set
+ echo "------END_BEFORE_SOURCE"
+@@ -61,8 +57,4 @@ unset topsrcdir
+ echo "------BEGIN_AFTER_SOURCE"
+ set
+ echo "------END_AFTER_SOURCE"
+-
+-echo "------BEGIN_ENV_AFTER_SOURCE"
+-env
+-echo "------END_ENV_AFTER_SOURCE"
+ 

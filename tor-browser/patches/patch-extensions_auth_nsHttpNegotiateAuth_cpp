@@ -1,0 +1,16 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/extensions/auth/nsHttpNegotiateAuth.cpp tor-browser/extensions/auth/nsHttpNegotiateAuth.cpp
+--- extensions/auth/nsHttpNegotiateAuth.cpp.orig	Mon Jan  5 23:08:07 2015
++++ extensions/auth/nsHttpNegotiateAuth.cpp	Tue Feb 17 14:37:55 2015
+@@ -85,6 +85,10 @@ nsHttpNegotiateAuth::ChallengeReceived(nsIHttpAuthenti
+     nsIAuthModule *module = (nsIAuthModule *) *continuationState;
+ 
+     *identityInvalid = false;
++
++    /* Always fail Negotiate auth for Tor Browser. We don't need it. */
++    return NS_ERROR_ABORT;
++
+     if (module)
+         return NS_OK;
+ 

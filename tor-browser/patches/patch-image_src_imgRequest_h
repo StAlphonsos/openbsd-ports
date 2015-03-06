@@ -1,0 +1,22 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/image/src/imgRequest.h tor-browser/image/src/imgRequest.h
+--- image/src/imgRequest.h.orig	Mon Jan  5 23:07:56 2015
++++ image/src/imgRequest.h	Tue Feb 17 14:37:55 2015
+@@ -55,6 +55,7 @@ class imgRequest : public nsIStreamListener, (public)
+ 
+   nsresult Init(nsIURI *aURI,
+                 nsIURI *aCurrentURI,
++                nsIURI *aFirstPartyIsolationURI,
+                 nsIRequest *aRequest,
+                 nsIChannel *aChannel,
+                 imgCacheEntry *aCacheEntry,
+@@ -206,6 +207,8 @@ class imgRequest : public nsIStreamListener, (public)
+   nsRefPtr<ImageURL> mURI;
+   // The URI of the resource we ended up loading after all redirects, etc.
+   nsCOMPtr<nsIURI> mCurrentURI;
++  // The first party that triggered the load -- for cookie + cache isolation
++  nsCOMPtr<nsIURI> mFirstPartyIsolationURI;
+   // The principal of the document which loaded this image. Used when validating for CORS.
+   nsCOMPtr<nsIPrincipal> mLoadingPrincipal;
+   // The principal of this image.

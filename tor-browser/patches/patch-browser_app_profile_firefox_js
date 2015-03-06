@@ -1,0 +1,93 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/browser/app/profile/firefox.js tor-browser/browser/app/profile/firefox.js
+--- browser/app/profile/firefox.js.orig	Mon Jan  5 23:07:53 2015
++++ browser/app/profile/firefox.js	Tue Feb 17 14:37:55 2015
+@@ -99,14 +99,6 @@ pref("app.update.log", false);
+ // the failure.
+ pref("app.update.backgroundMaxErrors", 10);
+ 
+-// The aus update xml certificate checks for application update are disabled on
+-// Windows since the mar signature check which is currently only implemented on
+-// Windows is sufficient for preventing us from applying a mar that is not
+-// valid.
+-#ifdef XP_WIN
+-pref("app.update.cert.requireBuiltIn", false);
+-pref("app.update.cert.checkAttributes", false);
+-#else
+ // When |app.update.cert.requireBuiltIn| is true or not specified the
+ // final certificate and all certificates the connection is redirected to before
+ // the final certificate for the url specified in the |app.update.url|
+@@ -140,23 +132,9 @@ pref("app.update.cert.maxErrors", 5);
+ // the |app.update.url.override| preference should ONLY be used for testing.
+ // IMPORTANT! metro.js should also be updated for updates to certs.X.issuerName
+ 
+-// Non-release builds (Nightly, Aurora, etc.) have been switched over to aus4.mozilla.org.
+-// This condition protects us against accidentally using it for release builds.
+-#ifndef RELEASE_BUILD
+-pref("app.update.certs.1.issuerName", "CN=DigiCert Secure Server CA,O=DigiCert Inc,C=US");
+-pref("app.update.certs.1.commonName", "aus4.mozilla.org");
++pref("app.update.certs.1.issuerName", "CN=DigiCert SHA2 High Assurance Server CA,OU=www.digicert.com,O=DigiCert Inc,C=US");
++pref("app.update.certs.1.commonName", "*.torproject.org");
+ 
+-pref("app.update.certs.2.issuerName", "CN=Thawte SSL CA,O=\"Thawte, Inc.\",C=US");
+-pref("app.update.certs.2.commonName", "aus4.mozilla.org");
+-#else
+-pref("app.update.certs.1.issuerName", "CN=Thawte SSL CA,O=\"Thawte, Inc.\",C=US");
+-pref("app.update.certs.1.commonName", "aus3.mozilla.org");
+-
+-pref("app.update.certs.2.issuerName", "CN=DigiCert Secure Server CA,O=DigiCert Inc,C=US");
+-pref("app.update.certs.2.commonName", "aus3.mozilla.org");
+-#endif
+-#endif
+-
+ // Whether or not app updates are enabled
+ pref("app.update.enabled", true);
+ 
+@@ -185,11 +163,7 @@ pref("app.update.silent", false);
+ pref("app.update.staging.enabled", true);
+ 
+ // Update service URL:
+-#ifndef RELEASE_BUILD
+-pref("app.update.url", "https://aus4.mozilla.org/update/3/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml");
+-#else
+-pref("app.update.url", "https://aus3.mozilla.org/update/3/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml");
+-#endif
++pref("app.update.url", "https://www.torproject.org/dist/torbrowser/update_2/%CHANNEL%/%BUILD_TARGET%/%VERSION%/%LOCALE%");
+ // app.update.url.manual is in branding section
+ // app.update.url.details is in branding section
+ 
+@@ -207,7 +181,7 @@ pref("app.update.idletime", 60);
+ // upgrade start page instead! Other apps may wish to show this UI, and supply
+ // a whatsNewURL field in their brand.properties that contains a link to a page
+ // which tells users what's new in this new update.
+-pref("app.update.showInstalledUI", false);
++pref("app.update.showInstalledUI", true);
+ 
+ // 0 = suppress prompting for incompatibilities if there are updates available
+ //     to newer versions of installed addons that resolve them.
+@@ -541,6 +515,14 @@ pref("privacy.sanitize.migrateFx3Prefs",    false);
+ 
+ pref("network.proxy.share_proxy_settings",  false); // use the same proxy settings for all protocols
+ 
++// The privacy.thirdparty.isolate pref determines whether
++// an isolated DOM Storage map and image cache are
++// maintained for each URL bar domain.
++// 0 - No isolation
++// 1 - Enable isolation in private windows
++// 2 - Enable isolation everywhere
++pref("privacy.thirdparty.isolate",          1);
++
+ // simple gestures support
+ pref("browser.gesture.swipe.left", "Browser:BackOrBackDuplicate");
+ pref("browser.gesture.swipe.right", "Browser:ForwardOrForwardDuplicate");
+@@ -1501,6 +1483,9 @@ pref("security.csp.speccompliant", true);
+ 
+ // Block insecure active content on https pages
+ pref("security.mixed_content.block_active_content", true);
++
++// 1 = allow MITM for certificate pinning checks.
++pref("security.cert_pinning.enforcement_level", 1);
+ 
+ // Override the Gecko-default value of false for Firefox.
+ pref("plain_text.wrap_long_lines", true);

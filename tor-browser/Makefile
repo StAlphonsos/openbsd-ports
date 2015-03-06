@@ -1,0 +1,114 @@
+# $OpenBSD: Makefile,v 1.15 2015/01/14 17:35:43 landry Exp $
+
+COMMENT =	Tor Browser, based on Firefox Extended Support Release (esr)
+
+MOZILLA_VERSION =	31.4.0esr
+MOZILLA_BRANCH =	esr31
+MOZILLA_PROJECT =	firefox
+MOZILLA_CODENAME =	browser
+
+# Something like this?
+#BROWSER_PROJECT ?= ${MOZILLA_PROJECT}
+#BROWSER_VERSION ?= ${MOZILLA_VERSION}
+
+BROWSER_PROJECT =	tor-browser
+BROWSER_NAME =		${BROWSER_PROJECT}
+BROWSER_VERSION = 	4.5
+BROWSER_VER =		${BROWSER_VERSION}
+
+PKGNAME =	${BROWSER_PROJECT}-${BROWSER_VERSION}
+SO_VERSION =	1.0
+MOZILLA_LIBS =	browsercomps mozalloc mozgnome xul
+
+CATEGORIES =	www
+
+# mozilla public license
+PERMIT_PACKAGE_CDROM=	Yes
+
+# lots of logic in mozilla.port.mk
+MODULES =	www/mozilla devel/gettext lang/python
+
+MODPY_RUNDEP =	No
+
+# necessary glue to build with the correct compiler after fx 17
+MODULES +=		gcc4 lang/clang
+MODGCC4_ARCHS =		powerpc sparc64 alpha i386
+MODGCC4_LANGS =		c c++
+MODCLANG_ARCHS =	amd64
+MODCLANG_LANGS =	c c++
+# fix for 982693
+.if ${MACHINE_ARCH:Mamd64}
+MAKE_ENV += VPXHACK="-fno-integrated-as"
+.endif
+
+# Regression tests are too hard to adapt to run here
+NO_TEST =	Yes
+
+CONFIGURE_STYLE =	autoconf no-autoheader
+
+# to be able to link when building with clang on i386 or gcc on ppc
+.if ${MACHINE_ARCH} == "i386" || ${MACHINE_ARCH} == "powerpc"
+CONFIGURE_ARGS +=	--disable-debug-symbols
+.endif
+
+# avoid conflict with mainline firefox
+CONFIGURE_ARGS +=	--with-app-name=${BROWSER_NAME} 		\
+			--with-tor-browser-version=${BROWSER_VER} 	\
+			--with-user-appdir=.${BROWSER_NAME} 		\
+			--disable-updater 				\
+			--disable-tor-browser-update
+
+# relies on pulseaudio for sound and broken at runtime
+CONFIGURE_ARGS +=	--disable-webrtc
+
+CONFIGURE_ARGS +=	--enable-gstreamer=1.0
+
+# libxul doesnt link directly with gst but dlopens it at runtime
+# see content/media/gstreamer/GStreamerLoader.cpp
+#LIB_DEPENDS +=	multimedia/gstreamer-0.10/plugins-base
+#WANTLIB += gmodule-2.0 gstapp-0.10 gstbase-0.10 gstreamer-0.10
+#WANTLIB += gstvideo-0.10 xml2
+
+BUILD_DEPENDS +=	multimedia/gstreamer1/plugins-base
+RUN_DEPENDS +=		net/tor multimedia/gstreamer1/plugins-good
+
+# needs 3.0.10 when not using gcc
+# CONFIGURE_ARGS += --with-system-ffi
+
+# --with-system-png=${LOCALBASE}
+# no system png : apng support not bundled in
+
+MOZILLA_AUTOCONF_DIRS +=	js/src
+
+SUBST_VARS += BROWSER_PROJECT BROWSER_VERSION BROWSER_VER
+
+post-extract:
+	# copy over binary files and new files that aren't created by patches
+	${TAR} -C ${FILESDIR}/post-extract -cf - . | ${TAR} -C ${WRKSRC} -xvf -
+	# hack .mozconfig
+	cp ${WRKSRC}/.mozconfig ${WRKSRC}/.mozconfig.bak
+	sed -e 's/@TOPSRCDIR@\/obj-@CONFIG_GUESS@/${WRKBUILD:S/\//\\\//g}/' \
+		< ${WRKSRC}/.mozconfig.bak > ${WRKSRC}/.mozconfig
+	# hack config/baseconfig.mk to not use MOZ_APP_VERSION in a few places
+	cp ${WRKSRC}/config/baseconfig.mk ${WRKSRC}/config/baseconfig.mk.bak
+	sed -e 's/-$$(MOZ_APP_VERSION)/-${BROWSER_VER}/'	\
+		< ${WRKSRC}/config/baseconfig.mk.bak > ${WRKSRC}/config/baseconfig.mk
+
+post-install:
+	# install prefs
+	${INSTALL_DATA_DIR} ${PREFIX}/lib/${BROWSER_PROJECT}-${BROWSER_VER}/browser/defaults/preferences
+	${SUBST_DATA} ${FILESDIR}/all-openbsd.js \
+		${PREFIX}/lib/${BROWSER_PROJECT}-${BROWSER_VER}/browser/defaults/preferences/all-openbsd.js
+	# install desktop file
+	${INSTALL_DATA_DIR} ${PREFIX}/share/applications/
+	${SUBST_DATA} ${FILESDIR}/${BROWSER_PROJECT}.desktop \
+		${PREFIX}/share/applications/${BROWSER_PROJECT}.desktop
+	# install icon for desktop file
+	${INSTALL_DATA_DIR} ${PREFIX}/share/pixmaps/
+	${INSTALL_DATA} ${PREFIX}/lib/${BROWSER_PROJECT}-${BROWSER_VER}/browser/icons/mozicon128.png \
+		${PREFIX}/share/pixmaps/${BROWSER_PROJECT}.png
+
+	# link default48.png to default.png to be used by default by non-icccm compliant wm
+	ln ${PREFIX}/lib/${BROWSER_PROJECT}-${BROWSER_VER}/browser/chrome/icons/default/default{48,}.png
+
+.include <bsd.port.mk>

@@ -1,0 +1,19 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/security/build/moz.build tor-browser/security/build/moz.build
+--- security/build/moz.build.orig	Mon Jan  5 23:07:59 2015
++++ security/build/moz.build	Tue Feb 17 14:37:56 2015
+@@ -5,10 +5,10 @@
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+ if CONFIG['MOZ_FOLD_LIBS']:
++    # Having thid if block here is needed to fix bug 1058778.
++    if CONFIG['OS_TARGET'] == 'WINNT':
++        DEFFILE = 'nss3.def'
+     # TODO: The library name can be changed when bug 845217 is fixed.
+     LIBRARY_NAME = 'nss3'
+ 
+     FORCE_SHARED_LIB = True
+-
+-if CONFIG['OS_TARGET'] == 'WINNT':
+-    DEFFILE = 'nss3.def'
