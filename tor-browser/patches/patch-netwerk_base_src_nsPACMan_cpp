@@ -1,0 +1,28 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/base/src/nsPACMan.cpp tor-browser/netwerk/base/src/nsPACMan.cpp
+--- netwerk/base/src/nsPACMan.cpp.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/base/src/nsPACMan.cpp	Tue Feb 17 14:37:56 2015
+@@ -320,8 +320,8 @@ nsPACMan::Shutdown()
+ }
+ 
+ nsresult
+-nsPACMan::AsyncGetProxyForURI(nsIURI *uri, nsPACManCallback *callback,
+-                              bool mainThreadResponse)
++nsPACMan::AsyncGetProxyForChannel(nsIChannel *channel, nsPACManCallback *callback,
++                                  bool mainThreadResponse)
+ {
+   NS_ABORT_IF_FALSE(NS_IsMainThread(), "wrong thread");
+   if (mShutdown)
+@@ -331,6 +331,11 @@ nsPACMan::AsyncGetProxyForURI(nsIURI *uri, nsPACManCal
+   if (!mPACURISpec.IsEmpty() && !mScheduledReload.IsNull() &&
+       TimeStamp::Now() > mScheduledReload)
+     LoadPACFromURI(EmptyCString());
++
++  nsCOMPtr<nsIURI> uri;
++  nsresult rv = channel->GetURI(getter_AddRefs(uri));
++  if (NS_FAILED(rv))
++    return rv;
+ 
+   nsRefPtr<PendingPACQuery> query =
+     new PendingPACQuery(this, uri, callback, mainThreadResponse);

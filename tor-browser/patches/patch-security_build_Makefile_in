@@ -1,0 +1,18 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/security/build/Makefile.in tor-browser/security/build/Makefile.in
+--- security/build/Makefile.in.orig	Mon Jan  5 23:07:59 2015
++++ security/build/Makefile.in	Tue Feb 17 14:37:56 2015
+@@ -289,11 +289,11 @@ endif
+ NSS_DIRS += \
+   nss/cmd/lib \
+   nss/cmd/shlibsign \
++  nss/cmd/certutil \
+   $(NULL)
+ 
+ ifdef ENABLE_TESTS
+ NSS_DIRS += \
+-  nss/cmd/certutil \
+   nss/cmd/pk12util \
+   nss/cmd/modutil \
+   $(NULL)

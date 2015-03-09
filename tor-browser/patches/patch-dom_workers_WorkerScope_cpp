@@ -1,0 +1,21 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/dom/workers/WorkerScope.cpp tor-browser/dom/workers/WorkerScope.cpp
+--- dom/workers/WorkerScope.cpp.orig	Mon Jan  5 23:08:07 2015
++++ dom/workers/WorkerScope.cpp	Tue Feb 17 14:37:55 2015
+@@ -52,11 +52,15 @@ NS_IMPL_CYCLE_COLLECTION_CLASS(WorkerGlobalScope)
+ NS_IMPL_CYCLE_COLLECTION_TRAVERSE_BEGIN_INHERITED(WorkerGlobalScope,
+                                                   DOMEventTargetHelper)
+   tmp->mWorkerPrivate->AssertIsOnWorkerThread();
++  NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mLocation)
++  NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mNavigator)
+ NS_IMPL_CYCLE_COLLECTION_TRAVERSE_END
+ 
+ NS_IMPL_CYCLE_COLLECTION_UNLINK_BEGIN_INHERITED(WorkerGlobalScope,
+                                                 DOMEventTargetHelper)
+   tmp->mWorkerPrivate->AssertIsOnWorkerThread();
++  NS_IMPL_CYCLE_COLLECTION_UNLINK(mLocation)
++  NS_IMPL_CYCLE_COLLECTION_UNLINK(mNavigator)
+ NS_IMPL_CYCLE_COLLECTION_UNLINK_END
+ 
+ NS_IMPL_CYCLE_COLLECTION_TRACE_BEGIN_INHERITED(WorkerGlobalScope,

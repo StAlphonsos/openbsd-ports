@@ -1,0 +1,14 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/security/manager/ssl/tests/unit/xpcshell.ini tor-browser/security/manager/ssl/tests/unit/xpcshell.ini
+--- security/manager/ssl/tests/unit/xpcshell.ini.orig	Mon Jan  5 23:08:00 2015
++++ security/manager/ssl/tests/unit/xpcshell.ini	Tue Feb 17 14:37:56 2015
+@@ -78,3 +78,7 @@ requesttimeoutfactor = 4
+ run-sequentially = hardcoded ports
+ # Bug  676972: this test times out on Android and B2G
+ skip-if = os == "android" || buildapp == "b2g"
++[test_pinning.js]
++run-sequentially = hardcoded ports
++# Bug 676972: test fails consistently on Android and B2G
++fail-if = os == "android" || buildapp == "b2g"
+\ No newline at end of file

@@ -1,0 +1,42 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/protocol/http/nsHttpConnectionMgr.h tor-browser/netwerk/protocol/http/nsHttpConnectionMgr.h
+--- netwerk/protocol/http/nsHttpConnectionMgr.h.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/protocol/http/nsHttpConnectionMgr.h	Tue Feb 17 14:37:56 2015
+@@ -19,7 +19,19 @@
+ 
+ #include "nsIObserver.h"
+ #include "nsITimer.h"
++#include "nsIRandomGenerator.h"
+ 
++// We need our own optional debug define because pipelining behavior
++// is significantly altered by rendering speed (which is abysmal on
++// debug builds)
++#ifdef DEBUG
++# define WTF_DEBUG
++#endif
++
++#ifdef WTF_DEBUG
++# define WTF_TEST
++#endif 
++
+ class nsIHttpUpgradeListener;
+ 
+ namespace mozilla {
+@@ -508,6 +520,7 @@ class nsHttpConnectionMgr : public nsIObserver (privat
+     nsresult BuildPipeline(nsConnectionEntry *,
+                            nsAHttpTransaction *,
+                            nsHttpPipeline **);
++    bool     HasPipelines(nsConnectionEntry *);
+     bool     RestrictConnections(nsConnectionEntry *, bool = false);
+     nsresult ProcessNewTransaction(nsHttpTransaction *);
+     nsresult EnsureSocketThreadTarget();
+@@ -524,7 +537,7 @@ class nsHttpConnectionMgr : public nsIObserver (privat
+ 
+     nsresult MakeNewConnection(nsConnectionEntry *ent,
+                                nsHttpTransaction *trans);
+-    bool     AddToShortestPipeline(nsConnectionEntry *ent,
++    bool     AddToBestPipeline(nsConnectionEntry *ent,
+                                    nsHttpTransaction *trans,
+                                    nsHttpTransaction::Classifier classification,
+                                    uint16_t depthLimit);

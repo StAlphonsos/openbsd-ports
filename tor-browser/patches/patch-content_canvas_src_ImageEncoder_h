@@ -1,0 +1,36 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/content/canvas/src/ImageEncoder.h tor-browser/content/canvas/src/ImageEncoder.h
+--- content/canvas/src/ImageEncoder.h.orig	Mon Jan  5 23:07:59 2015
++++ content/canvas/src/ImageEncoder.h	Tue Feb 17 14:37:55 2015
+@@ -33,6 +33,7 @@ class ImageEncoder (public)
+   static nsresult ExtractData(nsAString& aType,
+                               const nsAString& aOptions,
+                               const nsIntSize aSize,
++                              bool aUsePlaceholder,
+                               nsICanvasRenderingContextInternal* aContext,
+                               nsIInputStream** aStream);
+ 
+@@ -49,6 +50,7 @@ class ImageEncoder (public)
+                                    uint8_t* aImageBuffer,
+                                    int32_t aFormat,
+                                    const nsIntSize aSize,
++                                   bool aUsePlaceholder,
+                                    nsICanvasRenderingContextInternal* aContext,
+                                    nsIScriptContext* aScriptContext,
+                                    FileCallback& aCallback);
+@@ -72,6 +74,7 @@ class ImageEncoder (public)
+                       uint8_t* aImageBuffer,
+                       int32_t aFormat,
+                       const nsIntSize aSize,
++                      bool aUsePlaceholder,
+                       nsICanvasRenderingContextInternal* aContext,
+                       nsIInputStream** aStream,
+                       imgIEncoder* aEncoder);
+@@ -89,4 +92,4 @@ class ImageEncoder (public)
+ } // namespace dom
+ } // namespace mozilla
+ 
+-#endif // ImageEncoder_h
+\ No newline at end of file
++#endif // ImageEncoder_h

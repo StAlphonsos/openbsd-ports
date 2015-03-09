@@ -1,0 +1,24 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/content/canvas/src/CanvasGradient.h tor-browser/content/canvas/src/CanvasGradient.h
+--- content/canvas/src/CanvasGradient.h.orig	Mon Jan  5 23:07:59 2015
++++ content/canvas/src/CanvasGradient.h	Tue Feb 17 14:37:55 2015
+@@ -62,8 +62,9 @@ class CanvasGradient : public nsWrapperCache (public)
+   }
+ 
+ protected:
+-  CanvasGradient(CanvasRenderingContext2D* aContext, Type aType)
++  CanvasGradient(CanvasRenderingContext2D* aContext, mozilla::css::Loader *aLoader, Type aType)
+     : mContext(aContext)
++    , mCSSLoader(aLoader)
+     , mType(aType)
+   {
+     SetIsDOMBinding();
+@@ -72,6 +73,7 @@ class CanvasGradient : public nsWrapperCache (public)
+   nsRefPtr<CanvasRenderingContext2D> mContext;
+   nsTArray<mozilla::gfx::GradientStop> mRawStops;
+   mozilla::RefPtr<mozilla::gfx::GradientStops> mStops;
++  mozilla::css::Loader* mCSSLoader; // not ref counted, it owns us
+   Type mType;
+   virtual ~CanvasGradient() {}
+ };

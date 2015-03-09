@@ -1,0 +1,23 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/base/src/nsProxyInfo.h tor-browser/netwerk/base/src/nsProxyInfo.h
+--- netwerk/base/src/nsProxyInfo.h.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/base/src/nsProxyInfo.h	Tue Feb 17 14:37:56 2015
+@@ -35,6 +35,8 @@ class nsProxyInfo MOZ_FINAL : public nsIProxyInfo (pub
+   int32_t          Port()  { return mPort; }
+   const char      *Type()  { return mType; }
+   uint32_t         Flags() { return mFlags; }
++  const nsCString &Username()  { return mUsername; }
++  const nsCString &Password()  { return mPassword; }
+ 
+   bool IsDirect();
+   bool IsHTTP();
+@@ -59,6 +61,8 @@ class nsProxyInfo MOZ_FINAL : public nsIProxyInfo (pub
+ 
+   const char  *mType;  // pointer to statically allocated value
+   nsCString    mHost;
++  nsCString    mUsername;
++  nsCString    mPassword;
+   int32_t      mPort;
+   uint32_t     mFlags;
+   uint32_t     mResolveFlags;

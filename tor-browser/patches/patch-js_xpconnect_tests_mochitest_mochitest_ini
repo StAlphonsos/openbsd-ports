@@ -1,0 +1,20 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/js/xpconnect/tests/mochitest/mochitest.ini tor-browser/js/xpconnect/tests/mochitest/mochitest.ini
+--- js/xpconnect/tests/mochitest/mochitest.ini.orig	Mon Jan  5 23:08:07 2015
++++ js/xpconnect/tests/mochitest/mochitest.ini	Tue Feb 17 14:37:56 2015
+@@ -71,7 +71,6 @@ support-files =
+ [test_bug772288.html]
+ [test_bug781476.html]
+ [test_bug789713.html]
+-[test_bug790732.html]
+ [test_bug793969.html]
+ [test_bug800864.html]
+ [test_bug802557.html]
+@@ -97,4 +96,4 @@ support-files =
+ [test_getWebIDLCaller.html]
+ skip-if = (debug == false || os == "android")
+ [test_nac.xhtml]
+-[test_sameOriginPolicy.html]
++[test_sameOriginPolicy.html]
+\ No newline at end of file

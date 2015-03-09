@@ -1,0 +1,20 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/security/nss/lib/certhigh/ocsp.c tor-browser/security/nss/lib/certhigh/ocsp.c
+--- security/nss/lib/certhigh/ocsp.c.orig	Mon Jan  5 23:08:00 2015
++++ security/nss/lib/certhigh/ocsp.c	Tue Feb 17 14:37:56 2015
+@@ -2933,6 +2933,14 @@ ocsp_ConnectToHost(const char *host, PRUint16 port)
+     PRNetAddr addr;
+     char *netdbbuf = NULL;
+ 
++    // XXX: Do we need a unittest ifdef here? We don't want to break the tests, but
++    // we want to ensure nothing can ever hit this code in production.
++#if 1
++    printf("Tor Browser BUG: Attempted OSCP direct connect to %s, port %u\n", host,
++            port);
++    goto loser;
++#endif
++
+     sock = PR_NewTCPSocket();
+     if (sock == NULL)
+ 	goto loser;

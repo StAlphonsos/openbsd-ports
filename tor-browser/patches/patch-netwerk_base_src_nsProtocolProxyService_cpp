@@ -1,0 +1,479 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/base/src/nsProtocolProxyService.cpp tor-browser/netwerk/base/src/nsProtocolProxyService.cpp
+--- netwerk/base/src/nsProtocolProxyService.cpp.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/base/src/nsProtocolProxyService.cpp	Tue Feb 17 14:37:56 2015
+@@ -14,6 +14,7 @@
+ #include "nsIObserverService.h"
+ #include "nsIProtocolHandler.h"
+ #include "nsIProtocolProxyCallback.h"
++#include "nsIChannel.h"
+ #include "nsICancelable.h"
+ #include "nsIDNSService.h"
+ #include "nsPIDNSService.h"
+@@ -67,7 +68,7 @@ struct nsProtocolInfo {
+ //----------------------------------------------------------------------------
+ 
+ // The nsPACManCallback portion of this implementation should be run
+-// on the main thread - so call nsPACMan::AsyncGetProxyForURI() with
++// on the main thread - so call nsPACMan::AsyncGetProxyForChannel() with
+ // a true mainThreadResponse parameter.
+ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunnable
+                                       , public nsPACManCallback
+@@ -76,7 +77,7 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+ public:
+     NS_DECL_THREADSAFE_ISUPPORTS
+ 
+-    nsAsyncResolveRequest(nsProtocolProxyService *pps, nsIURI *uri,
++    nsAsyncResolveRequest(nsProtocolProxyService *pps, nsIChannel *channel,
+                           uint32_t aResolveFlags,
+                           nsIProtocolProxyCallback *callback)
+         : mStatus(NS_OK)
+@@ -84,7 +85,7 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+         , mResolveFlags(aResolveFlags)
+         , mPPS(pps)
+         , mXPComPPS(pps)
+-        , mURI(uri)
++        , mChannel(channel)
+         , mCallback(callback)
+     {
+         NS_ASSERTION(mCallback, "null callback");
+@@ -100,9 +101,9 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+             nsCOMPtr<nsIThread> mainThread;
+             NS_GetMainThread(getter_AddRefs(mainThread));
+ 
+-            if (mURI) {
+-                nsIURI *forgettable;
+-                mURI.forget(&forgettable);
++            if (mChannel) {
++                nsIChannel *forgettable;
++                mChannel.forget(&forgettable);
+                 NS_ProxyRelease(mainThread, forgettable, false);
+             }
+ 
+@@ -207,19 +208,21 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+         if (NS_SUCCEEDED(mStatus) && !mProxyInfo && !mPACString.IsEmpty()) {
+             mPPS->ProcessPACString(mPACString, mResolveFlags,
+                                    getter_AddRefs(mProxyInfo));
++            nsCOMPtr<nsIURI> uri;
++            mChannel->GetURI(getter_AddRefs(uri));
+ 
+             // Now apply proxy filters
+             nsProtocolInfo info;
+-            mStatus = mPPS->GetProtocolInfo(mURI, &info);
++            mStatus = mPPS->GetProtocolInfo(uri, &info);
+             if (NS_SUCCEEDED(mStatus))
+-                mPPS->ApplyFilters(mURI, info, mProxyInfo);
++                mPPS->ApplyFilters(mChannel, info, mProxyInfo);
+             else
+                 mProxyInfo = nullptr;
+ 
+             LOG(("pac thread callback %s\n", mPACString.get()));
+             if (NS_SUCCEEDED(mStatus))
+                 mPPS->MaybeDisableDNSPrefetch(mProxyInfo);
+-            mCallback->OnProxyAvailable(this, mURI, mProxyInfo, mStatus);
++            mCallback->OnProxyAvailable(this, mChannel, mProxyInfo, mStatus);
+         }
+         else if (NS_SUCCEEDED(mStatus) && !mPACURL.IsEmpty()) {
+             LOG(("pac thread callback indicates new pac file load\n"));
+@@ -229,12 +232,12 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+             if (NS_SUCCEEDED(rv)) {
+                 // now that the load is triggered, we can resubmit the query
+                 nsRefPtr<nsAsyncResolveRequest> newRequest =
+-                    new nsAsyncResolveRequest(mPPS, mURI, mResolveFlags, mCallback);
+-                rv = mPPS->mPACMan->AsyncGetProxyForURI(mURI, newRequest, true);
++                    new nsAsyncResolveRequest(mPPS, mChannel, mResolveFlags, mCallback);
++                rv = mPPS->mPACMan->AsyncGetProxyForChannel(mChannel, newRequest, true);
+             }
+ 
+             if (NS_FAILED(rv))
+-                mCallback->OnProxyAvailable(this, mURI, nullptr, rv);
++                mCallback->OnProxyAvailable(this, mChannel, nullptr, rv);
+ 
+             // do not call onproxyavailable() in SUCCESS case - the newRequest will
+             // take care of that
+@@ -243,7 +246,7 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+             LOG(("pac thread callback did not provide information %X\n", mStatus));
+             if (NS_SUCCEEDED(mStatus))
+                 mPPS->MaybeDisableDNSPrefetch(mProxyInfo);
+-            mCallback->OnProxyAvailable(this, mURI, mProxyInfo, mStatus);
++            mCallback->OnProxyAvailable(this, mChannel, mProxyInfo, mStatus);
+         }
+ 
+         // We are on the main thread now and don't need these any more so
+@@ -252,7 +255,7 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+         mCallback = nullptr;  // in case the callback holds an owning ref to us
+         mPPS = nullptr;
+         mXPComPPS = nullptr;
+-        mURI = nullptr;
++        mChannel = nullptr;
+         mProxyInfo = nullptr;
+     }
+ 
+@@ -266,7 +269,7 @@ class nsAsyncResolveRequest MOZ_FINAL : public nsIRunn
+ 
+     nsProtocolProxyService            *mPPS;
+     nsCOMPtr<nsIProtocolProxyService>  mXPComPPS;
+-    nsCOMPtr<nsIURI>                   mURI;
++    nsCOMPtr<nsIChannel>               mChannel;
+     nsCOMPtr<nsIProtocolProxyCallback> mCallback;
+     nsCOMPtr<nsIProxyInfo>             mProxyInfo;
+ };
+@@ -513,6 +516,12 @@ nsProtocolProxyService::PrefsChanged(nsIPrefBranch *pr
+     if (!pref || !strcmp(pref, PROXY_PREF("socks_port")))
+         proxy_GetIntPref(prefBranch, PROXY_PREF("socks_port"), mSOCKSProxyPort);
+ 
++    if (!pref || !strcmp(pref, PROXY_PREF("socks_username")))
++        proxy_GetStringPref(prefBranch, PROXY_PREF("socks_username"), mSOCKSProxyUsername);
++
++    if (!pref || !strcmp(pref, PROXY_PREF("socks_password")))
++        proxy_GetStringPref(prefBranch, PROXY_PREF("socks_password"), mSOCKSProxyPassword);
++
+     if (!pref || !strcmp(pref, PROXY_PREF("socks_version"))) {
+         int32_t version;
+         proxy_GetIntPref(prefBranch, PROXY_PREF("socks_version"), version);
+@@ -964,7 +973,7 @@ nsProtocolProxyService::ReloadPAC()
+ // The nsPACManCallback portion of this implementation should be run
+ // off the main thread, because it uses a condvar for signaling and
+ // the main thread is blocking on that condvar -
+-//  so call nsPACMan::AsyncGetProxyForURI() with
++//  so call nsPACMan::AsyncGetProxyForChannel() with
+ // a false mainThreadResponse parameter.
+ class nsAsyncBridgeRequest MOZ_FINAL  : public nsPACManCallback
+ {
+@@ -1010,16 +1019,19 @@ class nsAsyncBridgeRequest MOZ_FINAL  : public nsPACMa
+ };
+ NS_IMPL_ISUPPORTS0(nsAsyncBridgeRequest)
+ 
+-// nsIProtocolProxyService2
+-NS_IMETHODIMP
+-nsProtocolProxyService::DeprecatedBlockingResolve(nsIURI *aURI,
++// nsProtocolProxyService
++nsresult
++nsProtocolProxyService::DeprecatedBlockingResolve(nsIChannel *aChannel,
+                                                   uint32_t aFlags,
+                                                   nsIProxyInfo **retval)
+ {
+-    NS_ENSURE_ARG_POINTER(aURI);
++    NS_ENSURE_ARG_POINTER(aChannel);
+ 
++    nsCOMPtr<nsIURI> uri;
++    aChannel->GetURI(getter_AddRefs(uri));
++
+     nsProtocolInfo info;
+-    nsresult rv = GetProtocolInfo(aURI, &info);
++    nsresult rv = GetProtocolInfo(uri, &info);
+     if (NS_FAILED(rv))
+         return rv;
+ 
+@@ -1030,12 +1042,12 @@ nsProtocolProxyService::DeprecatedBlockingResolve(nsIU
+     // but if neither of them are in use, we can just do the work
+     // right here and directly invoke the callback
+ 
+-    rv = Resolve_Internal(aURI, info, aFlags, &usePACThread, getter_AddRefs(pi));
++    rv = Resolve_Internal(aChannel, info, aFlags, &usePACThread, getter_AddRefs(pi));
+     if (NS_FAILED(rv))
+         return rv;
+ 
+     if (!usePACThread || !mPACMan) {
+-        ApplyFilters(aURI, info, pi);
++        ApplyFilters(aChannel, info, pi);
+         pi.forget(retval);
+         return NS_OK;
+     }
+@@ -1044,7 +1056,7 @@ nsProtocolProxyService::DeprecatedBlockingResolve(nsIU
+     // code, but block this thread on that completion.
+     nsRefPtr<nsAsyncBridgeRequest> ctx = new nsAsyncBridgeRequest();
+     ctx->Lock();
+-    if (NS_SUCCEEDED(mPACMan->AsyncGetProxyForURI(aURI, ctx, false))) {
++    if (NS_SUCCEEDED(mPACMan->AsyncGetProxyForChannel(aChannel, ctx, false))) {
+         // this can really block the main thread, so cap it at 3 seconds
+        ctx->Wait();
+     }
+@@ -1060,7 +1072,7 @@ nsProtocolProxyService::DeprecatedBlockingResolve(nsIU
+     if (!ctx->mPACString.IsEmpty()) {
+         LOG(("sync pac thread callback %s\n", ctx->mPACString.get()));
+         ProcessPACString(ctx->mPACString, 0, getter_AddRefs(pi));
+-        ApplyFilters(aURI, info, pi);
++        ApplyFilters(aChannel, info, pi);
+         pi.forget(retval);
+         return NS_OK;
+     }
+@@ -1084,17 +1096,20 @@ nsProtocolProxyService::DeprecatedBlockingResolve(nsIU
+ }
+ 
+ nsresult
+-nsProtocolProxyService::AsyncResolveInternal(nsIURI *uri, uint32_t flags,
++nsProtocolProxyService::AsyncResolveInternal(nsIChannel *channel, uint32_t flags,
+                                              nsIProtocolProxyCallback *callback,
+                                              nsICancelable **result,
+                                              bool isSyncOK)
+ {
+-    NS_ENSURE_ARG_POINTER(uri);
++    NS_ENSURE_ARG_POINTER(channel);
+     NS_ENSURE_ARG_POINTER(callback);
+ 
++    nsCOMPtr<nsIURI> uri;
++    channel->GetURI(getter_AddRefs(uri));
++
+     *result = nullptr;
+     nsRefPtr<nsAsyncResolveRequest> ctx =
+-        new nsAsyncResolveRequest(this, uri, flags, callback);
++        new nsAsyncResolveRequest(this, channel, flags, callback);
+ 
+     nsProtocolInfo info;
+     nsresult rv = GetProtocolInfo(uri, &info);
+@@ -1108,13 +1123,13 @@ nsProtocolProxyService::AsyncResolveInternal(nsIURI *u
+     // but if neither of them are in use, we can just do the work
+     // right here and directly invoke the callback
+ 
+-    rv = Resolve_Internal(uri, info, flags, &usePACThread, getter_AddRefs(pi));
++    rv = Resolve_Internal(channel, info, flags, &usePACThread, getter_AddRefs(pi));
+     if (NS_FAILED(rv))
+         return rv;
+ 
+     if (!usePACThread || !mPACMan) {
+         // we can do it locally
+-        ApplyFilters(uri, info, pi);
++        ApplyFilters(channel, info, pi);
+         ctx->SetResult(NS_OK, pi);
+         if (isSyncOK) {
+             ctx->Run();
+@@ -1129,7 +1144,7 @@ nsProtocolProxyService::AsyncResolveInternal(nsIURI *u
+ 
+     // else kick off a PAC thread query
+ 
+-    rv = mPACMan->AsyncGetProxyForURI(uri, ctx, true);
++    rv = mPACMan->AsyncGetProxyForChannel(channel, ctx, true);
+     if (NS_SUCCEEDED(rv))
+         ctx.forget(result);
+     return rv;
+@@ -1137,19 +1152,19 @@ nsProtocolProxyService::AsyncResolveInternal(nsIURI *u
+ 
+ // nsIProtocolProxyService
+ NS_IMETHODIMP
+-nsProtocolProxyService::AsyncResolve2(nsIURI *uri, uint32_t flags,
++nsProtocolProxyService::AsyncResolve2(nsIChannel *channel, uint32_t flags,
+                                       nsIProtocolProxyCallback *callback,
+                                       nsICancelable **result)
+ {
+-    return AsyncResolveInternal(uri, flags, callback, result, true);
++    return AsyncResolveInternal(channel, flags, callback, result, true);
+ }
+ 
+ NS_IMETHODIMP
+-nsProtocolProxyService::AsyncResolve(nsIURI *uri, uint32_t flags,
++nsProtocolProxyService::AsyncResolve(nsIChannel *channel, uint32_t flags,
+                                      nsIProtocolProxyCallback *callback,
+                                      nsICancelable **result)
+ {
+-    return AsyncResolveInternal(uri, flags, callback, result, false);
++    return AsyncResolveInternal(channel, flags, callback, result, false);
+ }
+ 
+ NS_IMETHODIMP
+@@ -1179,10 +1194,25 @@ nsProtocolProxyService::NewProxyInfo(const nsACString 
+     }
+     NS_ENSURE_TRUE(type, NS_ERROR_INVALID_ARG);
+ 
+-    if (aPort <= 0)
+-        aPort = -1;
++    return NewProxyInfo_Internal(type, aHost, aPort,
++                                 mSOCKSProxyUsername, mSOCKSProxyPassword,
++                                 aFlags, aFailoverTimeout,
++                                 aFailoverProxy, 0, aResult);
++}
+ 
+-    return NewProxyInfo_Internal(type, aHost, aPort, aFlags, aFailoverTimeout,
++NS_IMETHODIMP
++nsProtocolProxyService::NewSOCKSProxyInfo(const nsACString &aHost,
++                                          int32_t aPort,
++                                          const nsACString &aUsername,
++                                          const nsACString &aPassword,
++                                          uint32_t aFlags,
++                                          uint32_t aFailoverTimeout,
++                                          nsIProxyInfo *aFailoverProxy,
++                                          nsIProxyInfo **aResult)
++{
++    return NewProxyInfo_Internal(kProxyType_SOCKS, aHost, aPort,
++                                 aUsername, aPassword,
++                                 aFlags, aFailoverTimeout,
+                                  aFailoverProxy, 0, aResult);
+ }
+ 
+@@ -1221,16 +1251,9 @@ nsProtocolProxyService::GetFailoverForProxy(nsIProxyIn
+     return NS_OK;
+ }
+ 
+-NS_IMETHODIMP
+-nsProtocolProxyService::RegisterFilter(nsIProtocolProxyFilter *filter,
+-                                       uint32_t position)
++nsresult
++nsProtocolProxyService::InsertFilterLink(FilterLink *link, uint32_t position)
+ {
+-    UnregisterFilter(filter);  // remove this filter if we already have it
+-
+-    FilterLink *link = new FilterLink(position, filter);
+-    if (!link)
+-        return NS_ERROR_OUT_OF_MEMORY;
+-
+     if (!mFilters) {
+         mFilters = link;
+         return NS_OK;
+@@ -1258,11 +1281,32 @@ nsProtocolProxyService::RegisterFilter(nsIProtocolProx
+ }
+ 
+ NS_IMETHODIMP
+-nsProtocolProxyService::UnregisterFilter(nsIProtocolProxyFilter *filter)
++nsProtocolProxyService::RegisterFilter(nsIProtocolProxyFilter *filter,
++                                       uint32_t position)
+ {
+-    // QI to nsISupports so we can safely test object identity.
+-    nsCOMPtr<nsISupports> givenObject = do_QueryInterface(filter);
++    UnregisterFilter(filter); // remove this filter if we already have it
+ 
++    FilterLink *link = new FilterLink(position, filter);
++    if (!link)
++        return NS_ERROR_OUT_OF_MEMORY;
++    return InsertFilterLink(link, position);
++}
++
++NS_IMETHODIMP
++nsProtocolProxyService::RegisterChannelFilter(nsIProtocolProxyChannelFilter *channelFilter,
++                                              uint32_t position)
++{
++    UnregisterChannelFilter(channelFilter);  // remove this filter if we already have it
++
++    FilterLink *link = new FilterLink(position, channelFilter);
++    if (!link)
++        return NS_ERROR_OUT_OF_MEMORY;
++    return InsertFilterLink(link, position);
++}
++
++nsresult
++nsProtocolProxyService::RemoveFilterLink(nsISupports* givenObject)
++{
+     FilterLink *last = nullptr;
+     for (FilterLink *iter = mFilters; iter; iter = iter->next) {
+         nsCOMPtr<nsISupports> object = do_QueryInterface(iter->filter);
+@@ -1283,6 +1327,20 @@ nsProtocolProxyService::UnregisterFilter(nsIProtocolPr
+ }
+ 
+ NS_IMETHODIMP
++nsProtocolProxyService::UnregisterFilter(nsIProtocolProxyFilter *filter) {
++    // QI to nsISupports so we can safely test object identity.
++    nsCOMPtr<nsISupports> givenObject = do_QueryInterface(filter);
++    return RemoveFilterLink(givenObject);
++}
++
++NS_IMETHODIMP
++nsProtocolProxyService::UnregisterChannelFilter(nsIProtocolProxyChannelFilter *channelFilter) {
++    // QI to nsISupports so we can safely test object identity.
++    nsCOMPtr<nsISupports> givenObject = do_QueryInterface(channelFilter);
++    return RemoveFilterLink(givenObject);
++}
++
++NS_IMETHODIMP
+ nsProtocolProxyService::GetProxyConfigType(uint32_t* aProxyConfigType)
+ {
+   *aProxyConfigType = mProxyConfig;
+@@ -1459,12 +1517,17 @@ nsresult
+ nsProtocolProxyService::NewProxyInfo_Internal(const char *aType,
+                                               const nsACString &aHost,
+                                               int32_t aPort,
++                                              const nsACString &aUsername,
++                                              const nsACString &aPassword,
+                                               uint32_t aFlags,
+                                               uint32_t aFailoverTimeout,
+                                               nsIProxyInfo *aFailoverProxy,
+                                               uint32_t aResolveFlags,
+                                               nsIProxyInfo **aResult)
+ {
++    if (aPort <= 0)
++        aPort = -1;
++
+     nsCOMPtr<nsProxyInfo> failover;
+     if (aFailoverProxy) {
+         failover = do_QueryInterface(aFailoverProxy);
+@@ -1478,6 +1541,8 @@ nsProtocolProxyService::NewProxyInfo_Internal(const ch
+     proxyInfo->mType = aType;
+     proxyInfo->mHost = aHost;
+     proxyInfo->mPort = aPort;
++    proxyInfo->mUsername = aUsername;
++    proxyInfo->mPassword = aPassword;
+     proxyInfo->mFlags = aFlags;
+     proxyInfo->mResolveFlags = aResolveFlags;
+     proxyInfo->mTimeout = aFailoverTimeout == UINT32_MAX
+@@ -1489,13 +1554,13 @@ nsProtocolProxyService::NewProxyInfo_Internal(const ch
+ }
+ 
+ nsresult
+-nsProtocolProxyService::Resolve_Internal(nsIURI *uri,
++nsProtocolProxyService::Resolve_Internal(nsIChannel *channel,
+                                          const nsProtocolInfo &info,
+                                          uint32_t flags,
+                                          bool *usePACThread,
+                                          nsIProxyInfo **result)
+ {
+-    NS_ENSURE_ARG_POINTER(uri);
++    NS_ENSURE_ARG_POINTER(channel);
+     nsresult rv = SetupPACThread();
+     if (NS_FAILED(rv))
+         return rv;
+@@ -1506,6 +1571,9 @@ nsProtocolProxyService::Resolve_Internal(nsIURI *uri,
+     if (!(info.flags & nsIProtocolHandler::ALLOWS_PROXY))
+         return NS_OK;  // Can't proxy this (filters may not override)
+ 
++    nsCOMPtr<nsIURI> uri;
++    channel->GetURI(getter_AddRefs(uri));
++
+     // See bug #586908.
+     // Avoid endless loop if |uri| is the current PAC-URI. Returning OK
+     // here means that we will not use a proxy for this connection.
+@@ -1640,8 +1708,9 @@ nsProtocolProxyService::Resolve_Internal(nsIURI *uri,
+     }
+ 
+     if (type) {
+-        rv = NewProxyInfo_Internal(type, *host, port, proxyFlags,
+-                                   UINT32_MAX, nullptr, flags,
++        rv = NewProxyInfo_Internal(type, *host, port,
++                                   mSOCKSProxyUsername, mSOCKSProxyPassword,
++                                   proxyFlags, UINT32_MAX, nullptr, flags,
+                                    result);
+         if (NS_FAILED(rv))
+             return rv;
+@@ -1675,7 +1744,7 @@ nsProtocolProxyService::MaybeDisableDNSPrefetch(nsIPro
+ }
+ 
+ void
+-nsProtocolProxyService::ApplyFilters(nsIURI *uri, const nsProtocolInfo &info,
++nsProtocolProxyService::ApplyFilters(nsIChannel *channel, const nsProtocolInfo &info,
+                                      nsIProxyInfo **list)
+ {
+     if (!(info.flags & nsIProtocolHandler::ALLOWS_PROXY))
+@@ -1690,9 +1759,22 @@ nsProtocolProxyService::ApplyFilters(nsIURI *uri, cons
+ 
+     for (FilterLink *iter = mFilters; iter; iter = iter->next) {
+         PruneProxyInfo(info, list);
+-
+-        rv = iter->filter->ApplyFilter(this, uri, *list,
+-                                       getter_AddRefs(result));
++        if (!!iter->filter) {
++          nsCOMPtr<nsIURI> uri;
++          channel->GetURI(getter_AddRefs(uri));
++          if (!!uri) {
++            nsCOMPtr<nsIHttpChannel> httpChannel = do_QueryInterface(channel);
++            nsCOMPtr<nsIURI> proxyURI = nullptr;
++            if (!!httpChannel) {
++              httpChannel->GetProxyURI(getter_AddRefs(proxyURI));
++            }
++            rv = iter->filter->ApplyFilter(this, proxyURI ? proxyURI : uri, *list,
++                                           getter_AddRefs(result));
++          }
++        } else if (!!iter->channelFilter) {
++          rv = iter->channelFilter->ApplyFilter(this, channel, *list,
++                                                getter_AddRefs(result));
++        }
+         if (NS_FAILED(rv))
+             continue;
+         result.swap(*list);

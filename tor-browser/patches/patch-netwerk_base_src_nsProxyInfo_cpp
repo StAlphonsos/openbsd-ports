@@ -1,0 +1,26 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/base/src/nsProxyInfo.cpp tor-browser/netwerk/base/src/nsProxyInfo.cpp
+--- netwerk/base/src/nsProxyInfo.cpp.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/base/src/nsProxyInfo.cpp	Tue Feb 17 14:37:56 2015
+@@ -48,6 +48,20 @@ nsProxyInfo::GetResolveFlags(uint32_t *result)
+ }
+ 
+ NS_IMETHODIMP
++nsProxyInfo::GetUsername(nsACString &result)
++{
++  result = mUsername;
++  return NS_OK;
++}
++
++NS_IMETHODIMP
++nsProxyInfo::GetPassword(nsACString &result)
++{
++  result = mPassword;
++  return NS_OK;
++}
++
++NS_IMETHODIMP
+ nsProxyInfo::GetFailoverTimeout(uint32_t *result)
+ {
+   *result = mTimeout;

@@ -1,0 +1,15 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/protocol/http/nsHttpNTLMAuth.cpp tor-browser/netwerk/protocol/http/nsHttpNTLMAuth.cpp
+--- netwerk/protocol/http/nsHttpNTLMAuth.cpp.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/protocol/http/nsHttpNTLMAuth.cpp	Tue Feb 17 14:37:56 2015
+@@ -285,6 +285,9 @@ nsHttpNTLMAuth::ChallengeReceived(nsIHttpAuthenticable
+ 
+     *identityInvalid = false;
+ 
++    /* Always fail Negotiate auth for Tor Browser. We don't need it. */
++    return NS_ERROR_ABORT;
++
+     // Start a new auth sequence if the challenge is exactly "NTLM".
+     // If native NTLM auth apis are available and enabled through prefs,
+     // try to use them.

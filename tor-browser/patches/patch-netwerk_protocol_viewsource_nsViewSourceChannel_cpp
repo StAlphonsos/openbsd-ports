@@ -1,0 +1,18 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/netwerk/protocol/viewsource/nsViewSourceChannel.cpp tor-browser/netwerk/protocol/viewsource/nsViewSourceChannel.cpp
+--- netwerk/protocol/viewsource/nsViewSourceChannel.cpp.orig	Mon Jan  5 23:07:57 2015
++++ netwerk/protocol/viewsource/nsViewSourceChannel.cpp	Tue Feb 17 14:37:56 2015
+@@ -115,6 +115,12 @@ nsViewSourceChannel::GetName(nsACString &result)
+ }
+ 
+ NS_IMETHODIMP
++nsViewSourceChannel::GetProxyURI(nsIURI** proxyURI)
++{
++    return NS_ERROR_NOT_IMPLEMENTED;
++}
++
++NS_IMETHODIMP
+ nsViewSourceChannel::IsPending(bool *result)
+ {
+     NS_ENSURE_TRUE(mChannel, NS_ERROR_FAILURE);

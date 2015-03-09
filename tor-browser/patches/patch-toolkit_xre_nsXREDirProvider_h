@@ -1,0 +1,36 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/toolkit/xre/nsXREDirProvider.h tor-browser/toolkit/xre/nsXREDirProvider.h
+--- toolkit/xre/nsXREDirProvider.h.orig	Mon Jan  5 23:08:06 2015
++++ toolkit/xre/nsXREDirProvider.h	Tue Feb 17 14:37:57 2015
+@@ -56,16 +56,16 @@ class nsXREDirProvider MOZ_FINAL : public nsIDirectory
+ 
+   nsresult GetProfileDefaultsDir(nsIFile* *aResult);
+ 
+-  static nsresult GetUserAppDataDirectory(nsIFile* *aFile) {
++  nsresult GetUserAppDataDirectory(nsIFile* *aFile) {
+     return GetUserDataDirectory(aFile, false, nullptr, nullptr, nullptr);
+   }
+-  static nsresult GetUserLocalDataDirectory(nsIFile* *aFile) {
++  nsresult GetUserLocalDataDirectory(nsIFile* *aFile) {
+     return GetUserDataDirectory(aFile, true, nullptr, nullptr, nullptr);
+   }
+ 
+   // By default GetUserDataDirectory gets profile path from gAppData,
+   // but that can be overridden by using aProfileName/aAppName/aVendorName.
+-  static nsresult GetUserDataDirectory(nsIFile** aFile, bool aLocal,
++  nsresult GetUserDataDirectory(nsIFile** aFile, bool aLocal,
+                                        const nsACString* aProfileName,
+                                        const nsACString* aAppName,
+                                        const nsACString* aVendorName);
+@@ -101,8 +101,8 @@ class nsXREDirProvider MOZ_FINAL : public nsIDirectory
+ 
+ protected:
+   nsresult GetFilesInternal(const char* aProperty, nsISimpleEnumerator** aResult);
+-  static nsresult GetUserDataDirectoryHome(nsIFile* *aFile, bool aLocal);
+-  static nsresult GetSysUserExtensionsDirectory(nsIFile* *aFile);
++  nsresult GetUserDataDirectoryHome(nsIFile* *aFile, bool aLocal);
++  nsresult GetSysUserExtensionsDirectory(nsIFile* *aFile);
+ #if defined(XP_UNIX) || defined(XP_MACOSX)
+   static nsresult GetSystemExtensionsDirectory(nsIFile** aFile);
+ #endif

@@ -1,0 +1,97 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/security/manager/ssl/src/nsNSSComponent.cpp tor-browser/security/manager/ssl/src/nsNSSComponent.cpp
+--- security/manager/ssl/src/nsNSSComponent.cpp.orig	Mon Jan  5 23:07:59 2015
++++ security/manager/ssl/src/nsNSSComponent.cpp	Tue Feb 17 14:37:56 2015
+@@ -857,6 +857,8 @@ static const bool ALLOW_UNRESTRICTED_RENEGO_DEFAULT = 
+ static const bool FALSE_START_ENABLED_DEFAULT = true;
+ static const bool NPN_ENABLED_DEFAULT = true;
+ static const bool ALPN_ENABLED_DEFAULT = false;
++static const bool SECURITY_NOCERTDB_DEFAULT = false;
++static const bool DISABLE_SESSION_IDENTIFIERS_DEFAULT = false;
+ 
+ namespace {
+ 
+@@ -994,6 +996,13 @@ void nsNSSComponent::setValidationOptions(bool isIniti
+     }
+   }
+ 
++  // Default pinning enforcement level is disabled.
++  CertVerifier::pinning_enforcement_config
++    pinningEnforcementLevel =
++      static_cast<CertVerifier::pinning_enforcement_config>
++        (Preferences::GetInt("security.cert_pinning.enforcement_level",
++                             CertVerifier::pinningDisabled));
++
+   CertVerifier::ocsp_download_config odc;
+   CertVerifier::ocsp_strict_config osc;
+   CertVerifier::ocsp_get_config ogc;
+@@ -1007,7 +1016,7 @@ void nsNSSComponent::setValidationOptions(bool isIniti
+       crlDownloading ?
+         CertVerifier::crl_download_allowed : CertVerifier::crl_local_only,
+ #endif
+-      odc, osc, ogc);
++      odc, osc, ogc, pinningEnforcementLevel);
+ 
+   // mozilla::pkix has its own OCSP cache, so disable the NSS cache
+   // if appropriate.
+@@ -1143,7 +1152,9 @@ nsNSSComponent::InitializeNSS()
+   }
+ 
+   SECStatus init_rv = SECFailure;
+-  if (!profileStr.IsEmpty()) {
++  bool nocertdb = Preferences::GetBool("security.nocertdb", SECURITY_NOCERTDB_DEFAULT);
++  
++  if (!nocertdb && !profileStr.IsEmpty()) {
+     // First try to initialize the NSS DB in read/write mode.
+     SECStatus init_rv = ::mozilla::psm::InitializeNSS(profileStr.get(), false);
+     // If that fails, attempt read-only mode.
+@@ -1156,9 +1167,9 @@ nsNSSComponent::InitializeNSS()
+     }
+   }
+   // If we haven't succeeded in initializing the DB in our profile
+-  // directory or we don't have a profile at all, attempt to initialize
+-  // with no DB.
+-  if (init_rv != SECSuccess) {
++  // directory or we don't have a profile at all, or the "security.nocertdb"
++  // pref has been set to "true", attempt to initialize with no DB.
++  if (nocertdb || init_rv != SECSuccess) {
+     init_rv = NSS_NoDB_Init(nullptr);
+   }
+   if (init_rv != SECSuccess) {
+@@ -1190,7 +1201,11 @@ nsNSSComponent::InitializeNSS()
+   InitCertVerifierLog();
+   LoadLoadableRoots();
+ 
+-  SSL_OptionSetDefault(SSL_ENABLE_SESSION_TICKETS, true);
++  bool disableSessionIdentifiers =
++    Preferences::GetBool("security.ssl.disable_session_identifiers",
++                         DISABLE_SESSION_IDENTIFIERS_DEFAULT);
++  SSL_OptionSetDefault(SSL_ENABLE_SESSION_TICKETS, !disableSessionIdentifiers);
++  SSL_OptionSetDefault(SSL_NO_CACHE, disableSessionIdentifiers);
+ 
+   bool requireSafeNegotiation =
+     Preferences::GetBool("security.ssl.require_safe_negotiation",
+@@ -1596,6 +1611,12 @@ nsNSSComponent::Observe(nsISupports* aSubject, const c
+     if (prefName.Equals("security.tls.version.min") ||
+         prefName.Equals("security.tls.version.max")) {
+       (void) setEnabledTLSVersions();
++    } else if (prefName.Equals("security.ssl.disable_session_identifiers")) {
++      bool disableSessionIdentifiers =
++        Preferences::GetBool("security.ssl.disable_session_identifiers",
++                             DISABLE_SESSION_IDENTIFIERS_DEFAULT);
++      SSL_OptionSetDefault(SSL_ENABLE_SESSION_TICKETS, !disableSessionIdentifiers);
++      SSL_OptionSetDefault(SSL_NO_CACHE, disableSessionIdentifiers);
+     } else if (prefName.Equals("security.ssl.require_safe_negotiation")) {
+       bool requireSafeNegotiation =
+         Preferences::GetBool("security.ssl.require_safe_negotiation",
+@@ -1629,7 +1650,8 @@ nsNSSComponent::Observe(nsISupports* aSubject, const c
+                || prefName.Equals("security.OCSP.GET.enabled")
+                || prefName.Equals("security.ssl.enable_ocsp_stapling")
+                || prefName.Equals("security.use_mozillapkix_verification")
+-               || prefName.Equals("security.use_libpkix_verification")) {
++               || prefName.Equals("security.use_libpkix_verification")
++               || prefName.Equals("security.cert_pinning.enforcement_level")) {
+       MutexAutoLock lock(mutex);
+       setValidationOptions(false, lock);
+     } else if (prefName.Equals("network.ntlm.send-lm-response")) {

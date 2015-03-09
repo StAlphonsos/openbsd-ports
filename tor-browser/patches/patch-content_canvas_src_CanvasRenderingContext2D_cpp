@@ -1,0 +1,186 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/content/canvas/src/CanvasRenderingContext2D.cpp tor-browser/content/canvas/src/CanvasRenderingContext2D.cpp
+--- content/canvas/src/CanvasRenderingContext2D.cpp.orig	Mon Jan  5 23:07:59 2015
++++ content/canvas/src/CanvasRenderingContext2D.cpp	Tue Feb 17 14:37:55 2015
+@@ -25,6 +25,7 @@
+ #include "nsCSSParser.h"
+ #include "mozilla/css/StyleRule.h"
+ #include "mozilla/css/Declaration.h"
++#include "mozilla/css/Loader.h"
+ #include "nsComputedDOMStyle.h"
+ #include "nsStyleSet.h"
+ 
+@@ -164,9 +165,10 @@ class CanvasRadialGradient : public CanvasGradient
+ {
+ public:
+   CanvasRadialGradient(CanvasRenderingContext2D* aContext,
++                       mozilla::css::Loader *aLoader,
+                        const Point &aBeginOrigin, Float aBeginRadius,
+                        const Point &aEndOrigin, Float aEndRadius)
+-    : CanvasGradient(aContext, Type::RADIAL)
++    : CanvasGradient(aContext, aLoader, Type::RADIAL)
+     , mCenter1(aBeginOrigin)
+     , mCenter2(aEndOrigin)
+     , mRadius1(aBeginRadius)
+@@ -184,8 +186,9 @@ class CanvasLinearGradient : public CanvasGradient
+ {
+ public:
+   CanvasLinearGradient(CanvasRenderingContext2D* aContext,
++                       mozilla::css::Loader *aLoader,
+                        const Point &aBegin, const Point &aEnd)
+-    : CanvasGradient(aContext, Type::LINEAR)
++    : CanvasGradient(aContext, aLoader, Type::LINEAR)
+     , mBegin(aBegin)
+     , mEnd(aEnd)
+   {
+@@ -396,8 +399,16 @@ CanvasGradient::AddColorStop(float offset, const nsASt
+     return;
+   }
+ 
++  nsIPresShell* presShell = nullptr;
++  if (mCSSLoader) {
++    nsIDocument *doc = mCSSLoader->GetDocument();
++    if (doc)
++      presShell = doc->GetShell();
++  }
++
+   nscolor color;
+-  if (!nsRuleNode::ComputeColor(value, nullptr, nullptr, color)) {
++  if (!nsRuleNode::ComputeColor(value, presShell ? presShell->GetPresContext() : nullptr,
++                                nullptr, color)) {
+     rv.Throw(NS_ERROR_DOM_SYNTAX_ERR);
+     return;
+   }
+@@ -1403,8 +1414,11 @@ CanvasRenderingContext2D::GetFillRule(nsAString& aStri
+ already_AddRefed<CanvasGradient>
+ CanvasRenderingContext2D::CreateLinearGradient(double x0, double y0, double x1, double y1)
+ {
++  nsIDocument *doc = mCanvasElement ? mCanvasElement->OwnerDoc() : nullptr;
++  mozilla::css::Loader *cssLoader = doc ? doc->CSSLoader() : nullptr;
++
+   nsRefPtr<CanvasGradient> grad =
+-    new CanvasLinearGradient(this, Point(x0, y0), Point(x1, y1));
++    new CanvasLinearGradient(this, cssLoader, Point(x0, y0), Point(x1, y1));
+ 
+   return grad.forget();
+ }
+@@ -1419,8 +1433,10 @@ CanvasRenderingContext2D::CreateRadialGradient(double 
+     return nullptr;
+   }
+ 
++  nsIDocument *doc = mCanvasElement ? mCanvasElement->OwnerDoc() : nullptr;
++  mozilla::css::Loader *cssLoader = doc ? doc->CSSLoader() : nullptr;
+   nsRefPtr<CanvasGradient> grad =
+-    new CanvasRadialGradient(this, Point(x0, y0), r0, Point(x1, y1), r1);
++    new CanvasRadialGradient(this, cssLoader, Point(x0, y0), r0, Point(x1, y1), r1);
+ 
+   return grad.forget();
+ }
+@@ -3107,12 +3123,19 @@ CanvasRenderingContext2D::LineDashOffset() const {
+ }
+ 
+ bool
+-CanvasRenderingContext2D::IsPointInPath(double x, double y, const CanvasWindingRule& winding)
++CanvasRenderingContext2D::IsPointInPath(JSContext* aCx, double x, double y, const CanvasWindingRule& winding)
+ {
+   if (!FloatValidate(x,y)) {
+     return false;
+   }
+ 
++  // Check for site-specific permission and return false if no permission.
++  if (mCanvasElement) {
++    nsCOMPtr<nsIDocument> ownerDoc = mCanvasElement->OwnerDoc();
++    if (!ownerDoc || !CanvasUtils::IsImageExtractionAllowed(ownerDoc, aCx))
++      return false;
++  }
++
+   EnsureUserSpacePath(winding);
+   if (!mPath) {
+     return false;
+@@ -3125,12 +3148,19 @@ CanvasRenderingContext2D::IsPointInPath(double x, doub
+   return mPath->ContainsPoint(Point(x, y), mTarget->GetTransform());
+ }
+ 
+-bool CanvasRenderingContext2D::IsPointInPath(const CanvasPath& mPath, double x, double y, const CanvasWindingRule& mWinding)
++bool CanvasRenderingContext2D::IsPointInPath(JSContext* aCx, const CanvasPath& mPath, double x, double y, const CanvasWindingRule& mWinding)
+ {
+   if (!FloatValidate(x,y)) {
+     return false;
+   }
+ 
++  // Check for site-specific permission and return false if no permission.
++  if (mCanvasElement) {
++    nsCOMPtr<nsIDocument> ownerDoc = mCanvasElement->OwnerDoc();
++    if (!ownerDoc || !CanvasUtils::IsImageExtractionAllowed(ownerDoc, aCx))
++      return false;
++  }
++
+   EnsureTarget();
+   RefPtr<gfx::Path> tempPath = mPath.GetPath(mWinding, mTarget);
+ 
+@@ -3138,12 +3168,19 @@ bool CanvasRenderingContext2D::IsPointInPath(const Can
+ }
+ 
+ bool
+-CanvasRenderingContext2D::IsPointInStroke(double x, double y)
++CanvasRenderingContext2D::IsPointInStroke(JSContext* aCx, double x, double y)
+ {
+   if (!FloatValidate(x,y)) {
+     return false;
+   }
+ 
++  // Check for site-specific permission and return false if no permission.
++  if (mCanvasElement) {
++    nsCOMPtr<nsIDocument> ownerDoc = mCanvasElement->OwnerDoc();
++    if (!ownerDoc || !CanvasUtils::IsImageExtractionAllowed(ownerDoc, aCx))
++      return false;
++  }
++
+   EnsureUserSpacePath();
+   if (!mPath) {
+     return false;
+@@ -3165,12 +3202,19 @@ CanvasRenderingContext2D::IsPointInStroke(double x, do
+   return mPath->StrokeContainsPoint(strokeOptions, Point(x, y), mTarget->GetTransform());
+ }
+ 
+-bool CanvasRenderingContext2D::IsPointInStroke(const CanvasPath& mPath, double x, double y)
++bool CanvasRenderingContext2D::IsPointInStroke(JSContext* aCx, const CanvasPath& mPath, double x, double y)
+ {
+   if (!FloatValidate(x,y)) {
+     return false;
+   }
+ 
++  // Check for site-specific permission and return false if no permission.
++  if (mCanvasElement) {
++    nsCOMPtr<nsIDocument> ownerDoc = mCanvasElement->OwnerDoc();
++    if (!ownerDoc || !CanvasUtils::IsImageExtractionAllowed(ownerDoc, aCx))
++      return false;
++  }
++
+   EnsureTarget();
+   RefPtr<gfx::Path> tempPath = mPath.GetPath(CanvasWindingRule::Nonzero, mTarget);
+ 
+@@ -3844,6 +3888,22 @@ CanvasRenderingContext2D::GetImageDataArray(JSContext*
+   }
+ 
+   uint8_t* data = JS_GetUint8ClampedArrayData(darray);
++
++  // Check for site-specific permission and return all-white, opaque pixel
++  // data if no permission.  This check is not needed if the canvas was
++  // created with a docshell (that is only done for special internal uses).
++  bool usePlaceholder = false;
++  if (mCanvasElement) {
++    nsCOMPtr<nsIDocument> ownerDoc = mCanvasElement->OwnerDoc();
++    usePlaceholder = !ownerDoc ||
++      !CanvasUtils::IsImageExtractionAllowed(ownerDoc, aCx);
++  }
++
++  if (usePlaceholder) {
++    memset(data, 0xFF, len.value());
++    *aRetval = darray;
++    return NS_OK;
++  }
+ 
+   IntRect dstWriteRect = srcReadRect;
+   dstWriteRect.MoveBy(-aX, -aY);

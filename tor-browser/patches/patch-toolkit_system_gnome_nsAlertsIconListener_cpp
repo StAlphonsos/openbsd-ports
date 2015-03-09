@@ -1,0 +1,15 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/toolkit/system/gnome/nsAlertsIconListener.cpp tor-browser/toolkit/system/gnome/nsAlertsIconListener.cpp
+--- toolkit/system/gnome/nsAlertsIconListener.cpp.orig	Mon Jan  5 23:08:06 2015
++++ toolkit/system/gnome/nsAlertsIconListener.cpp	Tue Feb 17 14:37:56 2015
+@@ -201,7 +201,8 @@ nsAlertsIconListener::StartRequest(const nsAString & a
+   if (!il)
+     return ShowAlert(nullptr);
+ 
+-  return il->LoadImageXPCOM(imageUri, nullptr, nullptr, nullptr, nullptr,
++  // XXX: Hrmm.... Bypass cache, or isolate to imageUrl?
++  return il->LoadImageXPCOM(imageUri, imageURI, nullptr, nullptr, nullptr,
+                             this, nullptr, nsIRequest::LOAD_NORMAL, nullptr,
+                             nullptr, getter_AddRefs(mIconRequest));
+ }

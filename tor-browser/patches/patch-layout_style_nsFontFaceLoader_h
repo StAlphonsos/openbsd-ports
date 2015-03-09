@@ -1,0 +1,14 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/layout/style/nsFontFaceLoader.h tor-browser/layout/style/nsFontFaceLoader.h
+--- layout/style/nsFontFaceLoader.h.orig	Mon Jan  5 23:08:02 2015
++++ layout/style/nsFontFaceLoader.h	Tue Feb 17 14:37:56 2015
+@@ -44,7 +44,7 @@ class nsUserFontSet : public gfxUserFontSet (public)
+ 
+   bool UpdateRules(const nsTArray<nsFontFaceRuleContainer>& aRules);
+ 
+-  nsPresContext* GetPresContext() { return mPresContext; }
++  virtual nsPresContext* GetPresContext() { return mPresContext; }
+ 
+   virtual void ReplaceFontEntry(gfxMixedFontFamily* aFamily,
+                                 gfxProxyFontEntry* aProxy,

@@ -1,0 +1,33 @@
+$OpenBSD$
+
+diff -Nup mozilla-esr31/dom/workers/RuntimeService.h tor-browser/dom/workers/RuntimeService.h
+--- dom/workers/RuntimeService.h.orig	Mon Jan  5 23:08:07 2015
++++ dom/workers/RuntimeService.h	Tue Feb 17 14:37:55 2015
+@@ -103,8 +103,11 @@ class RuntimeService MOZ_FINAL : public nsIObserver (p
+   struct NavigatorProperties
+   {
+     nsString mAppName;
++    nsString mAppNameOverridden;
+     nsString mAppVersion;
++    nsString mAppVersionOverridden;
+     nsString mPlatform;
++    nsString mPlatformOverridden;
+     nsString mUserAgent;
+   };
+ 
+@@ -184,6 +187,15 @@ class RuntimeService MOZ_FINAL : public nsIObserver (p
+     sDefaultJSSettings.content.contextOptions = aContentCxOptions;
+     sDefaultJSSettings.chrome.contextOptions = aChromeCxOptions;
+   }
++
++  void
++  UpdateAppNameOverridePreference(const nsAString& aValue);
++
++  void
++  UpdateAppVersionOverridePreference(const nsAString& aValue);
++
++  void
++  UpdatePlatformOverridePreference(const nsAString& aValue);
+ 
+   void
+   UpdateAllWorkerRuntimeAndContextOptions();
