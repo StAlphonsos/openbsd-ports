@@ -204,10 +204,9 @@ pre-configure:
 .for f in ${MOZILLA_SUBST_FILES}
 	${SUBST_CMD} ${WRKSRC}/${f}
 .endfor
-
-## End of mozilla.port.mk-derived snippet
-
-post-extract:
+## *** End of mozilla.port.mk-derived snippet ***
+## I had done this in post-extract but I guess pre-configure makes
+## slightly more sense.
 	# hack .mozconfig
 	cp ${WRKSRC}/.mozconfig ${WRKSRC}/.mozconfig.bak
 	sed -e 's/@TOPSRCDIR@\/obj-@CONFIG_GUESS@/${WRKBUILD:S/\//\\\//g}/' \
