@@ -1488,3 +1488,17 @@ patch-xpcom_io_nsAppFileLocationProvider_cpp
 ** 2015-03-04
 on amd64 now:
 make build 2>&1  6952.09s user 823.41s system 91% cpu 2:21:48.68 total
+
+* tbb
+** 2015-03-18
+Split common stuff out into a www/tbb module, although it could be
+made more general and instead called www/ffextension or something.
+The idea is that the Makefile for each tbb module that is a firefox
+extension be as short as possible and all the guts of how to make a
+ffext package is somewhere else.
+
+First working package: torbutton
+
+Unfortunately, still a lot of red in the output of ip-check.info's Tor
+anonymity test.  I think NoScript might fix some of it, which is
+weird...
