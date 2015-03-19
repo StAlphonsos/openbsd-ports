@@ -1488,8 +1488,6 @@ patch-xpcom_io_nsAppFileLocationProvider_cpp
 ** 2015-03-04
 on amd64 now:
 make build 2>&1  6952.09s user 823.41s system 91% cpu 2:21:48.68 total
-
-* tbb
 ** 2015-03-18
 Split common stuff out into a www/tbb module, although it could be
 made more general and instead called www/ffextension or something.
@@ -1502,3 +1500,36 @@ First working package: torbutton
 Unfortunately, still a lot of red in the output of ip-check.info's Tor
 anonymity test.  I think NoScript might fix some of it, which is
 weird...
+
+Okay, so I just figured that out, several hours after I wrote the
+above:
+
+  # pkg_delete tor-browser
+  tor-browser-4.0: ok
+  Read shared items: ok
+  --- -tor-browser-4.0 -------------------
+  Error deleting directory /usr/local/lib/tor-browser-4.0: Directory not empty
+  # ls /usr/local/lib/tor-browser-4.0
+  TorBrowser
+  # ls /usr/local/lib/tor-browser-4.0/TorBrowser 
+  Data
+  # ls /usr/local/lib/tor-browser-4.0/TorBrowser/Data
+  Browser
+  # ls /usr/local/lib/tor-browser-4.0/TorBrowser/Data/Browser 
+  6kpkwhn9.default Caches           profiles.ini
+  # ls -ld /usr/local/lib/tor-browser-4.0/TorBrowser/Data/Browser
+  drwx------  4 attila  wheel  512 Mar 11 14:58 /usr/local/lib/tor-browser-4.0/TorBrowser/Data/Browser
+
+What the fuck?  How was the browser able to do that?
+
+The answer: /usr/local/lib/tor-browser-4.0 is group writable.
+WRONG WRONG WRONG.
+** 2015-03-19
+I patched out this TorBrower shit in nsAppFileLocationProvider.cpp but
+still it persists in dropping this shit in the same place.  However,
+ktrace also gleaned this:
+
+ 15084 tor-browser NAMI  "/usr/local/lib/tor-browser-4.0/distribution/extensions"
+
+So that's the place to drop them.  Have to fix this other shit now.
+Irritating.
