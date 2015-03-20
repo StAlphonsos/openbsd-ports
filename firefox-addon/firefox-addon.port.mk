@@ -37,15 +37,19 @@ XPCOM_ABI =		sparc
 .endif
 SUBST_VARS += 		XPCOM_ABI
 
-# Gleaned via ktrace, I don't think this is where it
-# normally goes:
-EXTDIR ?=		${PREFIX}/lib/mozilla/extensions/
+# This is a bit sleazy because it only deals with one app;
+# the issue is PLIST... maybe I'm doing this wrong:
+APP ?= 			{ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+EXTDIR_ROOT ?=	lib/mozilla
+EXTDIR_BASE ?=  extensions
+EXTDIR ?=		${EXTDIR_ROOT}/${EXTDIR_ASE}/${APP}
+REAL_EXTDIR ?=	${PREFIX}/${EXTDIR}
+
+SUBST_VARS +=	EXTDIR_ROOT EXTDIR_BASE EXTDIR
 
 .if !defined(GUID)
 ERRORS += "GUID missing: www/firefox-addon ports module requires it"
 .endif
-
-APPS ?= 			{ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 
 .if ${FF_ADDON_XPI:L} == "yes"
 pre-extract:
@@ -56,7 +60,5 @@ do-build:
 .endif
 
 do-install:
-.for a in ${APPS}
-	${INSTALL_DATA_DIR} ${EXTDIR}/${a}/${GUID}
-	${UNZIP} -oq ${ADDON_BUILD_DIR}/${DISTNAME}*.xpi -d ${EXTDIR}/${a}/${GUID}
-.endfor
+	${INSTALL_DATA_DIR} ${REAL_EXTDIR}/${GUID}
+	${UNZIP} -oq ${ADDON_BUILD_DIR}/${DISTNAME}*.xpi -d ${REAL_EXTDIR}/${GUID}

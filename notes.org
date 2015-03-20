@@ -1579,3 +1579,43 @@ package built that installs in the right place for tbb but a
 non-flavored noscript package that installs in the right place for
 firefox/thunderbird.  I'll do the same thing with HTTPS Everywhere.
 Not sure WTF pluggable transports even is yet.
+
+
+Okay, we have a failure to communicate.
+
+Now I have all major packages built.   The ~/.mozilla issue is STILL
+unhandled, somehow... I don't know where that is hard-coded STILL
+I guess.  But more importantly, tor-launcher trips on its own dick.
+
+When I start with tor already running via the normal means:
+  # /etc/rc.d/tor start
+I get this:
+  $ tor-browser
+  Mar 20 16:09:43.291 [notice] Tor v0.2.5.10 (git-42b42605f8d8eac2) running on OpenBSD with Libevent 1.4.15-stable, OpenSSL LibreSSL 2.1 and Zlib 1.2.3.
+  Mar 20 16:09:43.292 [notice] Tor can't help you if you use it wrong! Learn how to be safe at https://www.torproject.org/download/download#warning
+  Mar 20 16:09:43.293 [notice] Read configuration file "/etc/tor/torrc".
+  Mar 20 16:09:43.299 [notice] Opening Socks listener on 127.0.0.1:9050
+  Mar 20 16:09:43.299 [warn] Could not bind to 127.0.0.1:9050: Address already in use. Is Tor already running?
+  Mar 20 16:09:43.300 [warn] Failed to parse/validate config: Failed to bind one of the listener ports.
+  Mar 20 16:09:43.300 [err] Reading config failed--see warnings above.
+
+So apparently tor-launcher tries to bind to the control socket port
+itself?  Why?
+
+Shutting down tor doesn't fix it, it makes it worse, because we don't
+want to run tor as me, we want to run tor as _tor:
+  # /etc/rc.d/tor stop
+Then:
+  $ tor-browser
+  Mar 20 16:13:48.319 [notice] Tor v0.2.5.10 (git-42b42605f8d8eac2) running on OpenBSD with Libevent 1.4.15-stable, OpenSSL LibreSSL 2.1 and Zlib 1.2.3.
+  Mar 20 16:13:48.319 [notice] Tor can't help you if you use it wrong! Learn how to be safe at https://www.torproject.org/download/download#warning
+  Mar 20 16:13:48.320 [notice] Read configuration file "/etc/tor/torrc".
+  Mar 20 16:13:48.325 [notice] Opening Socks listener on 127.0.0.1:9050
+  Mar 20 16:13:48.326 [notice] Caching new entry _tor for _tor
+  Mar 20 16:13:48.326 [warn] Error setting groups to gid 566: "Operation not permitted".
+  Mar 20 16:13:48.326 [warn] If you set the "User" option, you must start Tor as root.
+  Mar 20 16:13:48.327 [warn] Failed to parse/validate config: Problem with User value. See logs for details.
+  Mar 20 16:13:48.327 [err] Reading config failed--see warnings above.
+
+So I guess what I have to do is package up a torrc that is used
+internally in tor-launcher that is right for OpenBSD.  Joy.

@@ -7,6 +7,7 @@ FF_ADDON_XPI =		Yes
 MAINTAINER =		sean levy <attila@stalphonsos.com>
 HOMEPAGE =		http://noscript.net
 MASTER_SITES =		https://secure.informaction.com/download/releases/
+FLAVOR ?=
 FLAVORS =		tbb
 .if ${FLAVOR:Mtbb}
 MODULES =		www/tbb

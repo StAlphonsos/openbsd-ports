@@ -1,17 +1,17 @@
 @comment $OpenBSD$
-lib/mozilla/
-lib/mozilla/extensions/
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/GPL.txt
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/NoScript_License.txt
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/chrome/
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/chrome.manifest
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/chrome/noscript.jar
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/components/
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/components/noscriptService.js
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/defaults/
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/defaults/preferences/
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/defaults/preferences/noscript.js
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/install.rdf
-lib/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/{73a6fe31-595d-460b-a920-fcc0f8843232}/mozilla.cfg
+@dir ${EXTDIR_ROOT}
+@dir ${EXTDIR_BASE}
+@dir ${EXTDIR}
+@dir ${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/GPL.txt
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/NoScript_License.txt
+@dir ${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/chrome
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/chrome.manifest
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/chrome/noscript.jar
+@dir ${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/components
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/components/noscriptService.js
+@dir ${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/defaults
+@dir ${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/defaults/preferences
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/defaults/preferences/noscript.js
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/install.rdf
+${EXTDIR}/{73a6fe31-595d-460b-a920-fcc0f8843232}/mozilla.cfg

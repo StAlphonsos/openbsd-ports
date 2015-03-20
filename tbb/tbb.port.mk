@@ -12,6 +12,7 @@ ONLY_FOR_ARCHS =	i386 amd64 powerpc sparc64
 TBB_DISTNAME =		${FF_ADDON_NAME}
 TBB_DISTVERS =		${V}
 .endif
+FF_ADDON_XPI ?=
 .if ${FF_ADDON_XPI:L} == "yes"
 ZIP ?=				zip
 EXTRACT_CASES = *.xpi) \
@@ -54,7 +55,12 @@ SUBST_VARS += 		XPCOM_ABI
 
 # Gleaned via ktrace, I don't think this is where it
 # normally goes:
-EXTDIR ?=		${PREFIX}/lib/tor-browser-${TBB_VERSION}/distribution/extensions/
+EXTDIR_ROOT ?=		lib/tor-browser-${TBB_VERSION}
+EXTDIR_BASE ?=  	${EXTDIR_ROOT}/distribution
+EXTDIR ?=		${EXTDIR_BASE}/extensions/
+REAL_EXTDIR ?=		${PREFIX}/${EXTDIR}
+
+SUBST_VARS +=		EXTDIR_ROOT EXTDIR_BASE EXTDIR
 
 .if !defined(GUID)
 ERRORS += "GUID missing: tbb ports module requires it"
@@ -62,12 +68,12 @@ ERRORS += "GUID missing: tbb ports module requires it"
 
 .if ${FF_ADDON_XPI:L} == "yes"
 pre-extract:
-	mkdir -p ${ADDON_BUILD_DIR}
+	mkdir -p ${TBB_BUILDDIR}
 
 do-build:
-	cd ${WRKSRC} && ${ZIP} -X -9r ${WRKDIST}/${DISTNAME}.xpi ./ && mv ${WRKDIST}/${DISTNAME}.xpi ${ADDON_BUILD_DIR}
+	cd ${WRKSRC} && ${ZIP} -X -9r ${WRKDIST}/${DISTNAME}.xpi ./ && mv ${WRKDIST}/${DISTNAME}.xpi ${TBB_BUILDDIR}
 .endif
 
 do-install:
-	${INSTALL_DATA_DIR} ${EXTDIR}/${GUID}
-	${UNZIP} -oq ${TBB_BUILDDIR}/${TBB_DISTNAME}*.xpi -d ${EXTDIR}/${GUID}
+	${INSTALL_DATA_DIR} ${REAL_EXTDIR}/${GUID}
+	${UNZIP} -oq ${TBB_BUILDDIR}/${TBB_DISTNAME}*.xpi -d ${REAL_EXTDIR}/${GUID}
