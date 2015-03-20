@@ -8,9 +8,19 @@ MAINTAINER ?=		sean levy <attila@stalphonsos.com>
 # keep in synch with mozilla.port.mk
 ONLY_FOR_ARCHS =	i386 amd64 powerpc sparc64
 
-DISTNAME ?=		${TBB_DISTNAME}-${TBB_DISTVERS}
+.if !defined(TBB_DISTNAME) && defined(FF_ADDON_NAME)
+TBB_DISTNAME =		${FF_ADDON_NAME}
+TBB_DISTVERS =		${V}
+.endif
+.if ${FF_ADDON_XPI:L} == "yes"
+ZIP ?=				zip
+EXTRACT_CASES = *.xpi) \
+	${UNZIP} -oq ${FULLDISTDIR}/$$archive -d ${WRKSRC};;
+EXTRACT_SUFX = .xpi
+.endif
 
-HOMEPAGE =		http://www.torproject.org
+DISTNAME ?=		${TBB_DISTNAME}-${TBB_DISTVERS}
+HOMEPAGE ?=		http://www.torproject.org
 
 MASTER_SITES ?=		http://bits.haqistan.net/openbsd-tbb/
 
@@ -49,10 +59,15 @@ EXTDIR ?=		${PREFIX}/lib/tor-browser-${TBB_VERSION}/distribution/extensions/
 .if !defined(GUID)
 ERRORS += "GUID missing: tbb ports module requires it"
 .endif
-APPS = 			{ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+
+.if ${FF_ADDON_XPI:L} == "yes"
+pre-extract:
+	mkdir -p ${ADDON_BUILD_DIR}
+
+do-build:
+	cd ${WRKSRC} && ${ZIP} -X -9r ${WRKDIST}/${DISTNAME}.xpi ./ && mv ${WRKDIST}/${DISTNAME}.xpi ${ADDON_BUILD_DIR}
+.endif
 
 do-install:
-.for a in ${APPS}
-	${INSTALL_DATA_DIR} ${EXTDIR}/${a}/${GUID}
-	${UNZIP} -oq ${TBB_BUILDDIR}/${TBB_DISTNAME}*.xpi -d ${EXTDIR}/${a}/${GUID}
-.endfor
+	${INSTALL_DATA_DIR} ${EXTDIR}/${GUID}
+	${UNZIP} -oq ${TBB_BUILDDIR}/${TBB_DISTNAME}*.xpi -d ${EXTDIR}/${GUID}

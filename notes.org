@@ -1533,3 +1533,49 @@ ktrace also gleaned this:
 
 So that's the place to drop them.  Have to fix this other shit now.
 Irritating.
+
+** 2015-03-20
+Okay, I think I've got my shit straight now.
+
+It turns out all of this ~/.mozilla stuff is dealt with in two completely
+different places:
+  1. xpcom/io/nsAppFileLocationProvider.cpp
+  2. toolkit/xre/nsXREDirProvider.cpp
+It was the second that I had missed before.  It turns out that even in
+firefox esr34.0.1 there is a slight bug, or at least I think there is.
+Nowhere in that second file is MOZ_USER_DIR consulted; instead under Unix
+".mozilla" is hard-coded.  I patched this, but had to do it in an ugly way.
+Because it appears that MOZ_USER_DIR (the cpp define) is not available
+to me in the second place, instead I changed
+  static const char* const sXR = ".mozilla";
+to
+  static const char* const sXR = "." MOZ_APP_NAME;
+Since I know MOZ_APP_NAME is being set correctly, this should cause
+tor-browser to store its profiles under ~/.tor-browser.  I would argue
+that this is essential: you don't want tor-browser sharing the same
+~/.mozilla that your non-tor-browser firefox uses.
+
+As of 11:20am a new build is running that also patches the default tor
+port to be correct under OpenBSD.  I'm now going back to packaging
+noscript properly and then on to HTTPS Everywhere and Pluggable
+Transports.
+
+On that front, I've developed two ports modules that may end up
+boiling away in the final product: www/tbb and www/firefox-addon.  The
+second is a more generic version of the first, which is specific to
+tbb addons.  This is because they don't follow the pattern of other
+system-wide addons, where you interpose a directory whose name is the
+GUID of the application (firefox, thunderbird, seamonkey).  In the
+case of tor-browser for some reason the directory is different and
+there is no GUID for firefox as a directory in the hierarchy; this is
+probably because these extensions are normally stored in a profile,
+which doesn't have this extra layer of directory.
+
+Anyway, whatever.  I'm just trying to keep the makefiles short for the
+actual addons, and so far I'm succeeding.  In the case of noscript I'm
+using www/firefox-addon by default but switching to www/tbb if we're
+building the tbb flavor; this should arrange to get a noscript-tbb
+package built that installs in the right place for tbb but a
+non-flavored noscript package that installs in the right place for
+firefox/thunderbird.  I'll do the same thing with HTTPS Everywhere.
+Not sure WTF pluggable transports even is yet.
