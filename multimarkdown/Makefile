@@ -1,6 +1,6 @@
 # $OpenBSD$
 
-V =		4.6
+V =		4.7.1
 COMMENT =	marked-up plain text to formatted document converter
 DISTNAME =	${GH_PROJECT}-${V}
 PKGNAME =	multimarkdown-${V}
@@ -9,7 +9,7 @@ CATEGORIES =	textproc
 GH_ACCOUNT =	fletcher
 GH_PROJECT =	MultiMarkdown-4
 GH_TAGNAME =	${V}
-GH_COMMIT =	ad9595beb6f9380ad18f1fd07919a16a6d14fc46
+GH_COMMIT =	c1bc09342a516f318a6b2f3e7e259bc09d9c9513
 
 HOMEPAGE =	http://fletcherpenney.net/multimarkdown/
 MAINTAINER =	Sean Levy <attila@stalphonsos.com>

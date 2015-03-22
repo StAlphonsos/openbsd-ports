@@ -3,9 +3,9 @@ $OpenBSD$
 Under OpenBSD switch to using the greg parser generator
 from ports.
 
---- Makefile.orig	Mon Sep 22 12:57:41 2014
-+++ Makefile	Wed Jan  7 16:02:19 2015
-@@ -25,7 +25,7 @@ ifeq ($(MAKECMDGOALS),static)
+--- Makefile.orig	Mon Mar  9 18:52:39 2015
++++ Makefile	Sat Mar 21 15:44:10 2015
+@@ -32,7 +32,7 @@ ifeq ($(MAKECMDGOALS),static)
  LDFLAGS += -static -static-libgcc
  endif
  
@@ -14,7 +14,7 @@ from ports.
  
  ALL : $(PROGRAM) enumMap.txt
  static : $(PROGRAM) enumMap.txt
-@@ -33,11 +33,8 @@ static : $(PROGRAM) enumMap.txt
+@@ -40,11 +40,8 @@ static : $(PROGRAM) enumMap.txt
  %.o : %.c parser.h
  	$(CC) -c $(CFLAGS) -o $@ $<
  

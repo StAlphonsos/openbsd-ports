@@ -2,9 +2,9 @@ $OpenBSD$
 
 Switch from sprintf(3) to snprintf(3)
 
---- parser.leg.orig	Mon Sep 22 12:57:41 2014
-+++ parser.leg	Wed Jan  7 16:02:19 2015
-@@ -545,8 +545,10 @@ AutoLinkUrl =   '<' < [A-Za-z]+ "://" ( !Newline !'>' 
+--- parser.leg.orig	Mon Mar  9 18:52:39 2015
++++ parser.leg	Sat Mar 21 15:44:10 2015
+@@ -562,8 +562,10 @@ AutoLinkUrl =   '<' < [A-Za-z]+ "://" ( !Newline !'>' 
  
  AutoLinkEmail = '<' ( "mailto:" )? < [-A-Za-z0-9+_./!%~$]+ '@' ( !Newline !'>' . )+ > '>'
  	{
