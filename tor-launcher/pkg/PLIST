@@ -622,3 +622,6 @@ lib/tor-browser-4.0/distribution/extensions/tor-launcher@torproject.org/install.
 lib/tor-browser-4.0/distribution/extensions/tor-launcher@torproject.org/modules/
 lib/tor-browser-4.0/distribution/extensions/tor-launcher@torproject.org/modules/tl-logger.jsm
 lib/tor-browser-4.0/distribution/extensions/tor-launcher@torproject.org/modules/tl-util.jsm
+share/examples/tbb/
+share/examples/tbb/tbb-torrc
+@sample ${SYSCONFDIR}/tor/tbb-torrc

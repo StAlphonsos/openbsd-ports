@@ -1,0 +1,23 @@
+$OpenBSD$
+--- src/defaults/preferences/prefs.js.orig	Wed Mar 18 14:44:37 2015
++++ src/defaults/preferences/prefs.js	Fri Mar 20 19:02:49 2015
+@@ -3,15 +3,15 @@ pref("extensions.torlauncher.logmethod", 1);  // 0=std
+ pref("extensions.torlauncher.max_tor_log_entries", 1000);
+ 
+ pref("extensions.torlauncher.control_host", "127.0.0.1");
+-pref("extensions.torlauncher.control_port", 9151);
++pref("extensions.torlauncher.control_port", 9051);
+ 
+ pref("extensions.torlauncher.start_tor", true);
+ pref("extensions.torlauncher.prompt_at_startup", true);
+ 
+ // All path prefs. are relative to the firefox executable's directory
+-pref("extensions.torlauncher.tor_path", "");
+-pref("extensions.torlauncher.torrc_path", "");
+-pref("extensions.torlauncher.tordatadir_path", "");
++pref("extensions.torlauncher.tor_path", "/usr/local/bin/tor");
++pref("extensions.torlauncher.torrc_path", "/etc/tor/tbb-torrc");
++pref("extensions.torlauncher.tordatadir_path", "~/.tor");
+ 
+ // Recommended default bridge type (can be set per localized bundle).
+ // pref("extensions.torlauncher.default_bridge_recommended_type", "obfs3");
