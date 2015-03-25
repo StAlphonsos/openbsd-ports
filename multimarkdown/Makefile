@@ -24,7 +24,7 @@ BUILD_DEPENDS =	devel/greg
 USE_GMAKE =	Yes
 ALL_TARGET =	ALL
 MAKE_FLAGS =	CFLAGS="${CFLAGS} -include GLibFacade.h -DHAVE_ARC4RANDOM" \
-		GREG=/usr/local/bin/greg
+		GREG=${LOCALBASE}/bin/greg
 
 # Test files aren't included in distfile.
 NO_TEST =	Yes
