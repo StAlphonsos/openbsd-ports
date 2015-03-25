@@ -6,7 +6,7 @@ COMMENT =		tor-launcher add-on: Part of the Tor Browser Bundle
 
 USE_GMAKE =		Yes
 ALL_TARGET =		package
-MODULES =		www/tbb
+MODULES =		www/tbb-addon
 # So /etc/tor exists... 
 BUILD_DEPENDS =		net/tor
 GUID =			tor-launcher@torproject.org

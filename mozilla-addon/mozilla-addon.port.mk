@@ -1,11 +1,12 @@
 # $OpenBSD$
 # -*- mode: Makefile; tab-width: 4; -*-
-# Module for many (all?) Firefox extensions
+# Module for many (all?) Mozilla extensions
 # Adapted from mail/enigmail/Makefile by attila@stalphonsos.com
 
 # Teach bsd.port.mk how to unzip *.xpi files if that's what
-# we're working with; you set this in the port's Makefile:
-.if ${FF_ADDON_XPI:L} == "yes"
+# we're working with; you set MOZILLA_ADDON_XPI in the port's Makefile:
+MOZILLA_ADDON_XPI ?=
+.if ${MOZILLA_ADDON_XPI:L} == "yes"
 EXTRACT_CASES = *.xpi) \
 	${UNZIP} -oq ${FULLDISTDIR}/$$archive -d ${WRKSRC};;
 EXTRACT_SUFX = .xpi
@@ -16,11 +17,12 @@ WRKSRC ?= ${WRKDIST}/${DISTNAME}
 # keep in synch with mozilla.port.mk
 ONLY_FOR_ARCHS =	i386 amd64 powerpc sparc64
 
-DISTNAME ?=		${FF_ADDON_NAME}-${V}
+DISTNAME ?=		${MOZILLA_ADDON_NAME}-${V}
 CATEGORIES =		www
 
-BUILD_DEPENDS =		archivers/zip archivers/unzip
-ZIP ?=				zip
+BUILD_DEPENDS =		archivers/zip \
+			archivers/unzip
+ZIP ?=			zip
 ADDON_BUILD_SUBDIR ?= .
 ADDON_BUILD_DIR ?= 	${WRKBUILD}/${ADDON_BUILD_SUBDIR}
 
@@ -45,13 +47,15 @@ EXTDIR_BASE ?=  extensions
 EXTDIR ?=		${EXTDIR_ROOT}/${EXTDIR_ASE}/${APP}
 REAL_EXTDIR ?=	${PREFIX}/${EXTDIR}
 
+# PLIST fu but what if we want to support multiple apps,
+# e.g. seamonkey, t'bird... this fails, then.
 SUBST_VARS +=	EXTDIR_ROOT EXTDIR_BASE EXTDIR
 
 .if !defined(GUID)
 ERRORS += "GUID missing: www/firefox-addon ports module requires it"
 .endif
 
-.if ${FF_ADDON_XPI:L} == "yes"
+.if ${MOZILLA_ADDON_XPI:L} == "yes"
 pre-extract:
 	mkdir -p ${ADDON_BUILD_DIR}
 

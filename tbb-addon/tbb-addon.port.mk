@@ -8,16 +8,18 @@ MAINTAINER ?=		sean levy <attila@stalphonsos.com>
 # keep in synch with mozilla.port.mk
 ONLY_FOR_ARCHS =	i386 amd64 powerpc sparc64
 
-.if !defined(TBB_DISTNAME) && defined(FF_ADDON_NAME)
-TBB_DISTNAME =		${FF_ADDON_NAME}
-TBB_DISTVERS =		${V}
-.endif
-FF_ADDON_XPI ?=
-.if ${FF_ADDON_XPI:L} == "yes"
 ZIP ?=				zip
+MOZILLA_ADDON_XPI ?=
+.if ${MOZILLA_ADDON_XPI:L} == "yes"
 EXTRACT_CASES = *.xpi) \
 	${UNZIP} -oq ${FULLDISTDIR}/$$archive -d ${WRKSRC};;
 EXTRACT_SUFX = .xpi
+.endif
+
+.if defined(MOZILLA_ADDON_NAME)
+TBB_DISTNAME ?=		${MOZILLA_ADDON_NAME}
+TBB_DISTVERS ?=		${V}
+PKGNAME ?=		tbb-${TBB_DISTNAME}-${V}
 .endif
 
 DISTNAME ?=		${TBB_DISTNAME}-${TBB_DISTVERS}
@@ -32,7 +34,8 @@ PERMIT_PACKAGE_CDROM=	Yes
 
 CONFIGURE_STYLE =	none
 
-BUILD_DEPENDS =		archivers/zip archivers/unzip
+BUILD_DEPENDS =		archivers/zip \
+			archivers/unzip
 WRKDIST =		${WRKDIR}/${TBB_DISTNAME}-${TBB_DISTVERS}
 TBB_BUILD_SUBDIR ?=	pkg
 TBB_BUILDDIR ?= 	${WRKBUILD}/${TBB_BUILD_SUBDIR}
@@ -66,7 +69,7 @@ SUBST_VARS +=		EXTDIR_ROOT EXTDIR_BASE EXTDIR
 ERRORS += "GUID missing: tbb ports module requires it"
 .endif
 
-.if ${FF_ADDON_XPI:L} == "yes"
+.if ${MOZILLA_ADDON_XPI:L} == "yes"
 pre-extract:
 	mkdir -p ${TBB_BUILDDIR}
 
