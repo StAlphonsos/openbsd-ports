@@ -1,6 +1,6 @@
 $OpenBSD$
 --- toolkit/xre/nsXREDirProvider.cpp.orig	Fri Jan  9 15:20:41 2015
-+++ toolkit/xre/nsXREDirProvider.cpp	Fri Mar 20 11:07:29 2015
++++ toolkit/xre/nsXREDirProvider.cpp	Sat Mar 28 10:57:27 2015
 @@ -30,7 +30,6 @@
  #include "nsArrayEnumerator.h"
  #include "nsEnumeratorUtils.h"
@@ -212,7 +212,7 @@ $OpenBSD$
    if (!profile.IsEmpty()) {
      // Skip any leading path characters
      const char* profileStart = profile.get();
-@@ -1427,17 +1498,31 @@ nsXREDirProvider::AppendProfilePath(nsIFile* aFile,
+@@ -1427,17 +1498,21 @@ nsXREDirProvider::AppendProfilePath(nsIFile* aFile,
  
      // On the off chance that someone wanted their folder to be hidden don't
      // let it become ".."
@@ -229,17 +229,7 @@ $OpenBSD$
 -    NS_ENSURE_SUCCESS(rv, rv);
    }
 +  else {
-+    if (!vendor.IsEmpty()) {
-+      folder.Append(vendor);
-+      ToLowerCase(folder);
-+
-+      rv = aFile->AppendNative(folder);
-+      NS_ENSURE_SUCCESS(rv, rv);
-+
-+      folder.Truncate();
-+    }
-+
-+    folder.Append(appName);
++    folder.Append(MOZ_APP_NAME);
 +    ToLowerCase(folder);
 +
 +    rv = aFile->AppendNative(folder);

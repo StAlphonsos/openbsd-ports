@@ -1619,3 +1619,50 @@ Then:
 
 So I guess what I have to do is package up a torrc that is used
 internally in tor-launcher that is right for OpenBSD.  Joy.
+** 2015-03-21 - 2015-03-27
+Been lax with the notes, will try to fill in the gaps.
+
+I've been almost entirely consumed by The Hunt For Dot Mozilla.  In
+this awful drama I play the part of Sean Connery, the Russian
+submarine captain, attempting to swim his way to freedom.  No, wait,
+Sean Connery is an ACTOR.  Russian boat captains have names like Boris
+and Ivan.
+** 2015-03-30
+Alright, finally, something reasonably solid, albeit with caveats.
+
+Both torbutton and tor-launcher required substantial patching to get
+them to work in the way we want.  The browser itself also needed one
+more patch to finally s/.mozilla/.tor-browser/ and we are off to the
+races.
+
+In the end, this is how it works right now:
+- tor-browser creates its profile directories under ~/.tor-browser,
+  so e.g. this works:
+          this.mTorFileBaseDir = Cc["@mozilla.org/file/directory_service;1"]
+                   .getService(Ci.nsIProperties).get("DefProfRt",Ci.nsIFile);
+  "DefProfRt" will return ~/.tor-browser now (well, actually, the real
+  path)
+- tor-launcher installs and uses /etc/tor/tbb-torrc as the torrc-defaults
+  file combined with --ignore-missing-torrc and -f ~/.tor-browser/tor.rc
+  The default tor data directory will be ~/.tor-browser/tor_data/
+  This more or less makes the whole "bundle" idea reasonable sane in our
+  context: all state that tor-browser cares about lives under ~/.tor-browser
+  and you can tweak the tor config by munging ~/.tor-browser/tor.rc,
+  which won't exist by default (but wait until pluggable transports)
+- torbutton has had all of its automatic update checking disabled and
+  its default ports changed to match tbb-torrc and the openbsd defaults
+- tbb-noscript has been updated to the latest 2.6.9.19
+
+I'm going to sync this to git because this actually kind of works now.
+The tor-browser port itself needs to be updated to the latest 4.0.x
+based on firefox esr35 since that's now in openbsd ports.  That will
+be a little work.  Also need to finish HTTPS Everywhere and, hardest
+of all, pluggable transports.  The latter is why I decided to push
+through on making tor-launcher actually launch tor instead of just
+relying on tor being running beforehand: we need to do torrc fu in
+pluggable transports anyway, so we need to control tor and make it
+read our own config somehow.
+
+Not sure how this last bit is going to work out.  Am already midly
+terrified by all the shit I can do to the local machine from JS via
+XPCOM.

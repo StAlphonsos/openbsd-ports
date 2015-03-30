@@ -1,7 +1,7 @@
 # $OpenBSD$
 
 MOZILLA_ADDON_NAME =	noscript
-V =			2.6.9.18
+V =			2.6.9.19
 COMMENT =		Flexible JS Blocker for Firefox (Tor Browser variant)
 MOZILLA_ADDON_XPI =	Yes
 MAINTAINER =		sean levy <attila@stalphonsos.com>
